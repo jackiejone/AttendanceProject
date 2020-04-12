@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en-US">
+		<head>
+			<title>Attendace Management</title>
+			<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+		</head>
+
+		<body>
+				{%include "header.html"%}
+				{%include "navigation.html"%}
+				<div id="wrapper">
+					{%block content%}{%endblock%}
+				</div>
+					{%include "footer.html"%}
+		</body>
+</html>
