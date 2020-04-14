@@ -12,6 +12,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = database_file
 app.config['SECRET_KEY'] = os.urandom(16)
 db = SQLAlchemy(app)
 
+from models import *
+db.create_all() # Creates all tables
+
 @app.route('/', methods=["GET"])
 @app.route('/home', methods=["GET"])
 def home():
