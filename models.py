@@ -11,6 +11,7 @@ class User(db.Model):
     fname = db.Column(db.Text(20), nullable=False)
     lname = db.Column(db.Text(20), nullable=False)
     student_code = db.Column(db.Integer, nullable=False, unique=True)
+    auth = db.Column(db.Text(10), nullable=True)
     tags = db.relationship('UserTag', backref='user_tag')
     subjects = db.relationship('UserSubject', back_populates='user')
 
@@ -31,7 +32,9 @@ class SubjectCode(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     name = db.Column(db.Text(50), nullable=False)
     code = db.Column(db.Text(50), unique=True, nullable=False)
-    users = db.relationship('UserSubject', back_populates='subjects')
+    join_code = db.Column(db.Text(10), unique=True, nullable=False)
+    users = db.relationship('UserSubject', back_populates='subject')
+    times = db.relationship('SubjectTimes', backref='subject')
 
 # Association table bewtween User and their subject/s (class/es)
 class UserSubject(db.Model):
@@ -52,5 +55,11 @@ class AttendanceTime(db.Model):
     time = db.Column(db.Time, nullable=False) # Time field
     subject = db.Column(db.Integer, db.ForeignKey('user_subject.id'), nullable=False)
 
-print('Went through this page')
+class SubjectTimes(db.model):
+    __tablename__ = "subject_times"
+    
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    subject = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False)
+    s_time = db.Column(db.Time, nullable=False)
+    
     
