@@ -20,5 +20,25 @@ db.create_all() # Creates all tables
 def home():
     return render_template("home.html")
 
+@app.route('/register')
+def register():
+    return 'register'
+
+@app.route('/login')
+def login():
+    return 'login'
+
+@app.route('/classes')
+def classes():
+    return 'classes'
+
+@app.route('/classes/<class_code>')
+def class_code(class_code):
+    return class_code
+
+@app.route('/account/<user>')
+def account(user):
+    return user
+
 if __name__ == "__main__":
     app.run(debug=True)
