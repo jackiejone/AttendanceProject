@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#nav ul{
+    list-style-type: none;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#nav-left li {
+    float: left;
+  }
+
+#nav-right li {
+    float: right;
+}
+
+#nav li a {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+  /* Change the link color to #111 (black) on hover */
+#nav li a:hover {
+    background-color: orange;
+  }
+
+#wrapper {
+    margin-top: 46px;
+}

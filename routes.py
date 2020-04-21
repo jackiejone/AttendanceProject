@@ -22,23 +22,23 @@ def home():
 
 @app.route('/register')
 def register():
-    return 'register'
+    return render_template("register.html")
 
 @app.route('/login')
 def login():
-    return 'login'
+    return render_template("login.html")
 
 @app.route('/classes')
 def classes():
-    return 'classes'
+    return render_template("my_classes.html")
 
 @app.route('/classes/<class_code>')
 def class_code(class_code):
-    return class_code
+    return render_template("class.html")
 
 @app.route('/account/<user>')
 def account(user):
-    return user
+    return render_template("account.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

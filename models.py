@@ -55,7 +55,7 @@ class AttendanceTime(db.Model):
     time = db.Column(db.Time, nullable=False) # Time field
     subject = db.Column(db.Integer, db.ForeignKey('user_subject.id'), nullable=False)
 
-class SubjectTimes(db.model):
+class SubjectTimes(db.Model):
     __tablename__ = "subject_times"
     
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
