@@ -1,19 +1,25 @@
-from flask_sqlalchemy import SQLAlchemy
-from routes import db
+from attendanceproject import db, login_manager
+from flask_login import UserMixin
 
 # Database model
 
 # Table for Users
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "user"
     
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     fname = db.Column(db.Text(20), nullable=False)
     lname = db.Column(db.Text(20), nullable=False)
     student_code = db.Column(db.Integer, nullable=False, unique=True)
+    email = db.Column(db.Text(50), nullable=False, unique=True)
+    password = db.Column(db.Text(80), nullable=False)
     auth = db.Column(db.Text(10), nullable=True)
     tags = db.relationship('UserTag', backref='user_tag')
     subjects = db.relationship('UserSubject', back_populates='user')
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 # Table for storing RFID tags and associating them with a user (student) as one user could
 # have multiple tags. The tags also have UIDs which can be used for authentication 
