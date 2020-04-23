@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Register</h1>
+    
+    <form action='' method='POST'>
+        {{ form.csrf }}
+        {{ form.fname }}
+        {{ form.lname }}
+        {{ form.std_code }}
+        {{ form.email }}
+        {{ form.password }}
+        {{ form.confirm_password }}
+        {{ form.submit }}
+    </form>
+{% endblock %}
