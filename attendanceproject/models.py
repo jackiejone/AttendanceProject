@@ -14,7 +14,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.Text(50), nullable=False, unique=True)
     password = db.Column(db.Text(80), nullable=False)
     auth = db.Column(db.Text(10), nullable=True)
-    tags = db.relationship('UserTag', backref='user_tag')
+    tags = db.relationship('Tag', backref='user_tag')
     subjects = db.relationship('UserSubject', back_populates='user')
 
 @login_manager.user_loader
@@ -40,7 +40,7 @@ class SubjectCode(db.Model):
     code = db.Column(db.Text(50), unique=True, nullable=False)
     join_code = db.Column(db.Text(10), unique=True, nullable=False)
     users = db.relationship('UserSubject', back_populates='subject')
-    times = db.relationship('SubjectTimes', backref='subject')
+    times = db.relationship('SubjectTimes', backref='subjects')
 
 # Association table bewtween User and their subject/s (class/es)
 class UserSubject(db.Model):
@@ -49,9 +49,9 @@ class UserSubject(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # Foreign Key
     subject_id = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False) # Foreign Key
-    attnd_times = db.relationship('AttendanceTime', backref='subject')
-    user = db.relationship('User', back_populates='user')
-    subject = db.relationship('SubjectCode', back_populates='subject')
+    attnd_times = db.relationship('AttendanceTime', backref='subject_attnd_times')
+    user = db.relationship('User', backref='user')
+    subject = db.relationship('SubjectCode', backref='subject')
 
 # Table for associating signin times with the user's class which their signing into
 class AttendanceTime(db.Model):

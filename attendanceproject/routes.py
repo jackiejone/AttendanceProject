@@ -23,7 +23,7 @@ def register():
         print('got here')
         db.session.add(user)
         db.session.commit()
-        return render_template("Added User")
+        return "Added User"
         
     return render_template("register.html", form=form)
 
