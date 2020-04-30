@@ -1,6 +1,12 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, IntegerField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import Length, InputRequired, Email, EqualTo
+from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError
+
+def int_check(form, field):
+    try:
+        int(field.data)
+    except ValueError:
+        raise ValidationError('Student Code must be a whole number')
 
 class RegisterForm(FlaskForm):
     fname = StringField('First Name',
@@ -11,7 +17,7 @@ class RegisterForm(FlaskForm):
                                     InputRequired(message='Input Requried')])
     std_code = StringField('Student Code',
                            validators=[InputRequired(message='Input Required'),
-                                       Length(min=5, max=6)])
+                                       Length(min=5, max=6), int_check])
     email = StringField('Email', validators=[InputRequired(message='Input Required'),
                                              Email(message='Invalid Email Address')])
     password = PasswordField('Password', validators=[InputRequired(message='Input Required'),
@@ -19,4 +25,3 @@ class RegisterForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password', validators=[InputRequired(message='Input Required'),
                              Length(min=4), EqualTo('password', message='Passwords Did not match')])
     submit = SubmitField('Register')
-    

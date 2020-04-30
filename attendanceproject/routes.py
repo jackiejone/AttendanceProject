@@ -1,6 +1,7 @@
-from flask import render_template
+from flask import render_template, request
 from attendanceproject import app, db
 from attendanceproject.forms import *
+from attendanceproject.models import *
 from flask_login import (login_user, login_required,
                          logout_user, current_user,
                          fresh_login_required)
@@ -14,6 +15,16 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
+    if request.method == "POST" and form.validate_on_submit():
+        print('got here first')
+        user = User(fname=form.fname.data, lname=form.lname.data,
+                    student_code=form.std_code.data, email=form.email.data,
+                    password=form.password.data)
+        print('got here')
+        db.session.add(user)
+        db.session.commit()
+        return render_template("Added User")
+        
     return render_template("register.html", form=form)
 
 @app.route('/login')

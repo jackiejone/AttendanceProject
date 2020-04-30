@@ -9,6 +9,7 @@
 		<body>
 				{%include "header.html"%}
 				{%include "navigation.html"%}
+				{% from "_formhelpers.html" import render_field %}
 				<div id="wrapper">
 					{%block content%}{%endblock%}
 				</div>

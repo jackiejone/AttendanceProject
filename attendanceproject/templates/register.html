@@ -3,13 +3,13 @@
     <h1>Register</h1>
     
     <form action='' method='POST'>
-        {{ form.csrf }}
-        {{ form.fname }}
-        {{ form.lname }}
-        {{ form.std_code }}
-        {{ form.email }}
-        {{ form.password }}
-        {{ form.confirm_password }}
-        {{ form.submit }}
+            {{ form.csrf_token }}
+            {{ render_field(form.fname) }}
+            {{ render_field(form.lname) }}
+            {{ render_field(form.std_code) }}
+            {{ render_field(form.email) }}
+            {{ render_field(form.password) }}
+            {{ render_field(form.confirm_password) }}
+            {{ form.submit }}
     </form>
 {% endblock %}
