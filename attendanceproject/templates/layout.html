@@ -11,6 +11,7 @@
 				{%include "navigation.html"%}
 				{% from "_formhelpers.html" import render_field %}
 				<div id="wrapper">
+					{%include "flash.html" %}
 					{%block content%}{%endblock%}
 				</div>
 				{%include "footer.html"%}

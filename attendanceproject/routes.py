@@ -1,11 +1,12 @@
-from flask import render_template, request
+from flask import render_template, request, flash, redirect, url_for
 from attendanceproject import app, db
 from attendanceproject.forms import *
 from attendanceproject.models import *
 from flask_login import (login_user, login_required,
                          logout_user, current_user,
                          fresh_login_required)
-
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import IntegrityError
 
 @app.route('/', methods=["GET"])
 @app.route('/home', methods=["GET"])
@@ -16,15 +17,24 @@ def home():
 def register():
     form = RegisterForm()
     if request.method == "POST" and form.validate_on_submit():
-        print('got here first')
-        user = User(fname=form.fname.data, lname=form.lname.data,
-                    student_code=form.std_code.data, email=form.email.data,
-                    password=form.password.data)
-        print('got here')
-        db.session.add(user)
-        db.session.commit()
-        return "Added User"
-        
+        fname = form.fname.data.strip().lower()
+        lname = form.lname.data.strip().lower()
+        email = form.email.data.strip().lower()
+        student_code = form.std_code.data.strip().lower()
+        hashed_password = generate_password_hash(form.password.data, method='sha256')
+        user = User(fname=fname, lname=lname,
+                    student_code=student_code, email=email,
+                    password=hashed_password)
+        try:
+            db.session.add(user)
+            db.session.flush()
+        except IntegrityError:
+            db.session.rollback()
+            flash('Email or Student Code Already Taken')
+        else:
+            db.session.commit()
+            flash("Successfully Register")
+            return redirect(url_for('login'))
     return render_template("register.html", form=form)
 
 @app.route('/login')

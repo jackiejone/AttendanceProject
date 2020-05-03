@@ -47,11 +47,19 @@ body {
   }
 
 #wrapper {
-    margin-top: 52px;
+    margin-top: 152px;
     width: 90%;
     margin-left: auto;
     margin-right: auto;
     text-align: center;
+}
+
+#flashes {
+  list-style: none;
+  color: red;
+  width: auto;
+  text-align: center;
+  min-width: 550px
 }
 
 #macro {
@@ -66,7 +74,6 @@ body {
   border-radius: 30px;
   margin-left: auto;
   margin-right: auto;
-  margin-top: 100px;
 }
 
 .register h1 {
