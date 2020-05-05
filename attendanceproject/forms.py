@@ -25,3 +25,10 @@ class RegisterForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password', validators=[InputRequired(message='Input Required'),
                              Length(min=4), EqualTo('password', message='Passwords Did not match')])
     submit = SubmitField('Register')
+    
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[InputRequired(message='Input Required'),
+                                             Email(message='Invalid Email Address')])
+    password = PasswordField('Password', validators=[InputRequired(message='Input Required'),
+                             Length(min=4)])
+    submit = SubmitField('Login')

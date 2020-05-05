@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 
 @app.route('/', methods=["GET"])
 @app.route('/home', methods=["GET"])
+@login_required
 def home():
     return render_template("home.html")
 
@@ -37,9 +38,28 @@ def register():
             return redirect(url_for('login'))
     return render_template("register.html", form=form)
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template("login.html")
+    form = LoginForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        email = form.email.data.strip().lower()
+        user = User.query.filter_by(email=email).first()
+        if user:
+            if check_password_hash(user.password, form.password.data):
+                login_user(user)
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('home'))
+            else:
+                flash('Invalid Email or Password')
+        else:
+            flash('Invalid Email or Password')
+    return render_template("login.html", form=form)
+
+@app.route('/logout')
+def logout():
+    if current_user.is_authenticated:
+        logout_user()
+    return redirect(url_for('home'))
 
 @app.route('/classes')
 def classes():
