@@ -2,18 +2,22 @@
 <html lang="en-US">
 		<head>
 			<title>Attendace Management</title>
+			<!-- Linking style sheet -->
 			<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+			<!-- Getting front from google api -->
 			<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
 		</head>
 
 		<body>
-				{%include "header.html"%}
-				{%include "navigation.html"%}
-				{% from "_formhelpers.html" import render_field %}
-				<div id="wrapper">
-					{%include "flash.html" %}
-					{%block content%}{%endblock%}
-				</div>
-				{%include "footer.html"%}
+			{%include "header.html"%}
+			{%include "navigation.html"%}
+			{% from "_formhelpers.html" import render_field %} <!-- HTML file with a macro for displaying form fields -->
+			<div id="wrapper">
+				{%include "flash.html" %} <!-- HTML file with flashed messages format for reuse -->
+				<!-- Main content -->
+				{%block content%}
+				{%endblock%}
+			</div>
+			{%include "footer.html"%}
 		</body>
 </html>

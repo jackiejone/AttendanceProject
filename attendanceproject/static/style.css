@@ -83,7 +83,7 @@ body {
 }
 
 .register form {
-  min-height: 220px;
+  min-height: 250px;
 }
 
 .register label {
@@ -99,8 +99,11 @@ body {
   margin-bottom: 0px;
 }
 
+.submit {
+  float: left;
+}
+
 .submit input {
-  float: none;
   margin-left: auto;
   margin-right: auto;
   margin-top: 5px;

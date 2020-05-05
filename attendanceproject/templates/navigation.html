@@ -3,13 +3,20 @@
     <ul>
         <div id="nav-left">
             <li><a href="{{url_for('home')}}">Home</a></li>
-            <li><a href="{{url_for('classes')}}">Classes</a></li>
-            <li><a href="{{url_for('class_code', class_code='test')}}">Specific class</a></li>
+            {% if current_user.is_authenticated %}
+                <li><a href="{{url_for('classes')}}">Classes</a></li>
+                <li><a href="{{url_for('class_code', class_code='test')}}">Specific class</a></li>
+            {% endif %}
         </div>
         <div id="nav-right">
-            <li><a href="{{url_for('register')}}">Register</a></li>
-            <li><a href="{{url_for('login')}}">Login</a></li>
-            <li><a href="{{url_for('account', user='test')}}">Account</a></li>
+            {% if not current_user.is_authenticated %}
+                <li><a href="{{url_for('register')}}">Register</a></li>
+                <li><a href="{{url_for('login')}}">Login</a></li>
+            {% endif %}
+            {% if current_user.is_authenticated %}
+                <li><a href="{{url_for('logout')}}">Logout</a></li>
+                <li><a href="{{url_for('account', user='test')}}">Account</a></li>
+            {% endif %}
         </div>
     </ul>
 </div>
