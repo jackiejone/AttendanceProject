@@ -1,6 +1,6 @@
 <!-- Macro for rendering form fields -->
 {% macro render_field(field) %}
-  <div id='macro'>
+  <div id='field'>
     {% if field.errors %}
       <ul class=errors>
         {% for error in field.errors %}
@@ -8,8 +8,6 @@
         {% endfor %}
       </ul>
     {% endif %}
-    <br>
-    {{ field.label }}
     {{ field(**kwargs)|safe }}
   </div>
 {% endmacro %}
