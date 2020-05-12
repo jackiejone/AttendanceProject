@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class='register-login'>
+        <h1>New Class</h1>
+        
+        <!-- Form for registering -->
+        <form action='' method='POST'>
+                {{ form.csrf_token }}
+                {{ render_field(form.cname) }}
+                {{ render_field(form.ccode) }}
+                <div class='submit'>{{ form.submit }}</div>
+        </form>
+    </div>
+{% endblock %}

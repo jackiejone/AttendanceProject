@@ -7,6 +7,9 @@ from flask_login import (login_user, login_required,
                          fresh_login_required)
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError
+from string import ascii_letters, digits
+from random import choice
+
 
 # Home Route
 @app.route('/', methods=["GET"])
@@ -22,8 +25,8 @@ def register():
     # Checking for POST request and form validation
     if request.method == "POST" and form.validate_on_submit():
         # Formatting first name, last name, email, and student number to prevent errors
-        fname = form.fname.data.strip().lower().capitalize()
-        lname = form.lname.data.strip().lower().capitalize()
+        fname = form.fname.data.capitalize().strip().lower()
+        lname = form.lname.data.capitalize().strip().lower()
         email = form.email.data.strip().lower()
         student_code = form.std_code.data.strip().lower()
         # Generates hashed password using SHA256 encryption method
@@ -85,6 +88,34 @@ def logout():
 @login_required
 def classes():
     return render_template("my_classes.html")
+
+def generate_code():
+    chars = ascii_letters + digits
+    code = ''.join(choice(chars) for i in range(6))
+    if SubjectCode.query.filter_by(join_code=code).first():
+        generate_code()
+    else:
+        return code
+
+@app.route('/new_class', methods=['GET', 'POST'])
+@login_required
+def create_class():
+    form = CreateClassForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        class_name = form.cname.data.capitalize().strip().lower()
+        class_code = form.ccode.data
+        join_code = generate_code()
+        new_class = SubjectCode(name=class_name, code=class_code,
+                                join_code=join_code)
+        try:
+            db.session.add(new_class)
+            db.session.flush()
+        except IntegrityError:
+            flash('Class Code Already Taken')
+        else:
+            db.session.commit()
+            flash('Class Successfully Added')
+    return render_template('create_class.html', form=form)
 
 # Individual class route
 @app.route('/classes/<class_code>')
