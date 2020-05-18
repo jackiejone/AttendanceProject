@@ -101,6 +101,9 @@ def generate_code():
 @login_required
 def create_class():
     form = CreateClassForm()
+    if current_user.auth != "teacher":
+        flash("You do not have permission to access this page")
+        return redirect(url_for('home'))
     if request.method == 'POST' and form.validate_on_submit():
         class_name = form.cname.data.capitalize().strip().lower()
         class_code = form.ccode.data
@@ -115,6 +118,11 @@ def create_class():
         else:
             db.session.commit()
             flash('Class Successfully Added')
+            user = User.query.filter_by(id=current_user.id).first()
+            asso = UserSubject(user_type='teacher')
+            asso.subject = new_class
+            user.subjects.append(asso)
+            db.session.commit()
     return render_template('create_class.html', form=form)
 
 # Individual class route

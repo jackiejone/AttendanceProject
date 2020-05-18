@@ -47,11 +47,12 @@ class UserSubject(db.Model):
     __tablename__ = "user_subject"
     
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # Foreign Key
-    subject_id = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False) # Foreign Key
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # Foreign Key
+    user_type = db.Column(db.Text(10), nullable=False) # Teacher or student relationship to class
+    subject_id = db.Column(db.Integer, db.ForeignKey('subject_code.id')) # Foreign Key
     attnd_times = db.relationship('AttendanceTime', backref='subject_attnd_times')
-    user = db.relationship('User', backref='user')
-    subject = db.relationship('SubjectCode', backref='subject')
+    user = db.relationship('User', back_populates='subjects')
+    subject = db.relationship('SubjectCode', back_populates='users')
 
 # Table for associating signin times with the user's class which their signing into
 class AttendanceTime(db.Model):
