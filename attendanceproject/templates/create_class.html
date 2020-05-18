@@ -8,6 +8,7 @@
                 {{ form.csrf_token }}
                 {{ render_field(form.cname) }}
                 {{ render_field(form.ccode) }}
+                <div class='boolean'>{{form.auto_add.label }} {{ form.auto_add }}</div>
                 <div class='submit'>{{ form.submit }}</div>
         </form>
     </div>

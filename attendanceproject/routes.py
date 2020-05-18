@@ -97,32 +97,46 @@ def generate_code():
     else:
         return code
 
+# Route for creating new class
 @app.route('/new_class', methods=['GET', 'POST'])
 @login_required
 def create_class():
     form = CreateClassForm()
+    # Checking if the user accessing the page is a teacher
     if current_user.auth != "teacher":
         flash("You do not have permission to access this page")
+        # Redirects the user back to the home page if they're not a teacher
         return redirect(url_for('home'))
+    
+    # Checks for POST request and valid form
     if request.method == 'POST' and form.validate_on_submit():
+        # Prepares form data For insertion into database
         class_name = form.cname.data.capitalize().strip().lower()
         class_code = form.ccode.data
         join_code = generate_code()
+        # Creates new class object with data from the form
         new_class = SubjectCode(name=class_name, code=class_code,
                                 join_code=join_code)
+        # Tries to add the new class to the database and flues it
+        # If an IntegrityError is returned, then the class already exists and 
+        # no new class is added to the database
         try:
             db.session.add(new_class)
             db.session.flush()
         except IntegrityError:
             flash('Class Code Already Taken')
         else:
+            # If there is no error returned, the class is added to the database and
+            # the teacher who created the class is also associated with the class
             db.session.commit()
             flash('Class Successfully Added')
-            user = User.query.filter_by(id=current_user.id).first()
-            asso = UserSubject(user_type='teacher')
-            asso.subject = new_class
-            user.subjects.append(asso)
-            db.session.commit()
+            print(form.auto_add.data)
+            if form.auto_add.data == True:
+                user = User.query.filter_by(id=current_user.id).first()
+                asso = UserSubject(user_type='teacher')
+                asso.subject = new_class
+                user.subjects.append(asso)
+                db.session.commit()
     return render_template('create_class.html', form=form)
 
 # Individual class route

@@ -49,4 +49,5 @@ class CreateClassForm(FlaskForm):
     ccode = StringField('Class Code', validators=[InputRequired(message='Fied Required'),
                                                   Length(max=50)],
                         render_kw={"placeholder": "Class Code"})
+    auto_add = BooleanField('Join Class')
     submit = SubmitField('Create Class')
