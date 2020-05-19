@@ -4,6 +4,16 @@
 
     <form method='POST' action="">
         {{ form.hidden_tag() }}
+        {{ form.csrf_token }}
         {{ form.classesfield }}
+        {{ form.submit }}
     </form>
+
+    {% if formdata %}
+    <ul>
+        {% for i in formdata %}
+            <li>{{ i }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 {% endblock %}

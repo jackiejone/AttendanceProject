@@ -84,11 +84,34 @@ def logout():
     return redirect(url_for('home'))
 
 # Classes Route
-@app.route('/classes')
+@app.route('/classes', methods=['GET', 'POST'])
 @login_required
 def classes():
     form = JoinClassForm()
-    return render_template("my_classes.html", form=form)
+    if request.method == 'POST' and form.validate_on_submit():
+        formdata = [(int(x)) for x in form.classesfield.data]
+        for sub_id in formdata:
+            add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id)
+            try:
+                db.session.add(add_user_subject)
+                db.session.flush()
+            except:
+                db.session.rollback()
+            else:
+                db.session.commit()
+        return render_template('my_classes.html', form=form, formdata=formdata)
+    return render_template('my_classes.html', form=form, formdata=None)
+    """
+    if request.method == 'POST' and  form.validate_on_submit():
+        print(form.classesfield.data)
+        return render_template('test.html', formdata=form.classesfield.data)
+    elif request.method == 'GET':
+        return render_template("my_classes.html", form=form)
+    else:
+        print('validation failed')
+        print(form.errors)
+        return render_template("my_classes.html", form=form)
+    """
 
 # Function to create unique alphanumeric codes
 def generate_code():

@@ -64,6 +64,7 @@ class JoinClassFields(SelectMultipleField):
 # Form for joining classes using boolean fields
 class JoinClassForm(FlaskForm):
     classes = SubjectCode.query.all()
-    sclasses = [(x.id, x.name) for x in classes]
+    sclasses = [(str(x.id), x.name) for x in classes]
     classesfield = JoinClassFields('Label', choices=sclasses)
+    submit = SubmitField('Join Classes')
     
