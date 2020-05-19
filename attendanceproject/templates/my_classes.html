@@ -1,4 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>my classes</h1>
+
+    <form method='POST' action="">
+        {{ form.hidden_tag() }}
+        {{ form.classesfield }}
+    </form>
 {% endblock %}

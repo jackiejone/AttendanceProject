@@ -87,11 +87,17 @@ def logout():
 @app.route('/classes')
 @login_required
 def classes():
-    return render_template("my_classes.html")
+    form = JoinClassForm()
+    return render_template("my_classes.html", form=form)
 
+# Function to create unique alphanumeric codes
 def generate_code():
+    # Defines the list of imported characters to be chosen from
     chars = ascii_letters + digits
+    # Creates string with 6 randomly chosen characters linked together
     code = ''.join(choice(chars) for i in range(6))
+    # Checks if the code already exists in the database
+    # generates a new code if the code already exists
     if SubjectCode.query.filter_by(join_code=code).first():
         generate_code()
     else:
@@ -131,6 +137,7 @@ def create_class():
             db.session.commit()
             flash('Class Successfully Added')
             print(form.auto_add.data)
+            # Associating the teacher with the class
             if form.auto_add.data == True:
                 user = User.query.filter_by(id=current_user.id).first()
                 asso = UserSubject(user_type='teacher')
