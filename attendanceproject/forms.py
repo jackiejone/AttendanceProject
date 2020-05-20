@@ -65,6 +65,6 @@ class JoinClassFields(SelectMultipleField):
 class JoinClassForm(FlaskForm):
     classes = SubjectCode.query.all()
     sclasses = [(str(x.id), x.name) for x in classes]
-    classesfield = JoinClassFields('Label', choices=sclasses)
+    classesfield = JoinClassFields('Label', choices=sclasses, validators=[])
     submit = SubmitField('Join Classes')
     

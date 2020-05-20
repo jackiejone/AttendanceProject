@@ -2,6 +2,13 @@
 {% block content %}
     <h1>my classes</h1>
 
+    {% if form.errors %}
+        <ul>
+            {% for error in form.errors %}
+                <li>{{ form.errors[error] }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
     <form method='POST' action="">
         {{ form.hidden_tag() }}
         {{ form.csrf_token }}
@@ -12,6 +19,9 @@
     {% if formdata %}
     <ul>
         {% for i in formdata %}
+            {% for error in i.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
             <li>{{ i }}</li>
         {% endfor %}
     </ul>

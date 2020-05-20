@@ -88,30 +88,40 @@ def logout():
 @login_required
 def classes():
     form = JoinClassForm()
+
+    # Handing form post request
     if request.method == 'POST' and form.validate_on_submit():
-        formdata = [(int(x)) for x in form.classesfield.data]
-        for sub_id in formdata:
-            add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id)
+        formdata = []
+        for x in form.classesfield.data:
             try:
-                db.session.add(add_user_subject)
-                db.session.flush()
-            except:
-                db.session.rollback()
+                formdata.append(int(x))
+            except ValueError:
+                flash('Invalid class')
+                print("Failed {}".format(x))
             else:
-                db.session.commit()
+                print("Passed {}".format(x))
+        """
+        for sub_id in formdata:
+            add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id, user_type=current_user.auth)
+            user_subjects = UserSubject.query.filter_by(user_id=current_user.id, subject_id=sub_id).first()
+            if user_subjects:
+                continue
+            else:
+                try:
+                    db.session.add(add_user_subject)
+                    db.session.flush()
+                except:
+                    db.session.rollback()
+                else:
+                    db.session.commit()"""
         return render_template('my_classes.html', form=form, formdata=formdata)
-    return render_template('my_classes.html', form=form, formdata=None)
-    """
-    if request.method == 'POST' and  form.validate_on_submit():
-        print(form.classesfield.data)
-        return render_template('test.html', formdata=form.classesfield.data)
     elif request.method == 'GET':
-        return render_template("my_classes.html", form=form)
-    else:
-        print('validation failed')
+        return render_template('my_classes.html', form=form, formdata=None)
+    
+    elif request.method == 'POST' and not form.validate_on_submit():
+        print(type(form.errors))
         print(form.errors)
-        return render_template("my_classes.html", form=form)
-    """
+        return render_template('my_classes.html', form=form, formdata=None)
 
 # Function to create unique alphanumeric codes
 def generate_code():
