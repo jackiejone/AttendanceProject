@@ -63,5 +63,5 @@ class MultiCheckboxField(SelectMultipleField):
 
 # Form for joining classes using boolean fields
 class JoinClassForm(FlaskForm):
-    classes = MultiCheckboxField('Classes')
+    classes = MultiCheckboxField('Classes', coerce=int)
     submit = SubmitField('Join Classes')
