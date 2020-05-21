@@ -15,9 +15,7 @@
     <form method='POST' action="">
         {{ form.hidden_tag() }}
         {{ form.csrf_token }}
-        {% for class in form.classesfield %}
-            {{ class }}
-        {% endfor %}
+        {{ form.classesfield }}
         {{ form.submit }}
     </form>
 

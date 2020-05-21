@@ -89,8 +89,8 @@ def logout():
 def classes():
     classes = SubjectCode.query.all()
     sclasses = [{str(x.id): x.name} for x in classes]
-    print(sclasses)
-    form = JoinClassForm(classesfield=sclasses)
+    form = JoinClassForm(classesfield=JoinClassFields(choices=sclasses))
+    print(form.classesfield)
     # https://wtforms.readthedocs.io/en/latest/crash_course/
     # Handling form post reqeust for adding a user to multiple classes
     if request.method == 'POST' and form.validate_on_submit():
