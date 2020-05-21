@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SelectField, IntegerField, PasswordField,
-                     BooleanField, SubmitField, SelectMultipleField, )
+                     BooleanField, SubmitField, SelectMultipleField, FieldList, FormField)
 from wtforms.widgets import CheckboxInput, ListWidget
-from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError
+from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError, AnyOf
 from attendanceproject.models import *
 
 def int_check(form, field):
@@ -57,14 +57,10 @@ class CreateClassForm(FlaskForm):
 
 
 # Dynamic boolean fields for each class
-class JoinClassFields(SelectMultipleField):
-    widget = ListWidget(prefix_label=False)
+class JoinClassFields(FlaskForm):
     option_widget = CheckboxInput()
 
 # Form for joining classes using boolean fields
 class JoinClassForm(FlaskForm):
-    classes = SubjectCode.query.all()
-    sclasses = [(str(x.id), x.name) for x in classes]
-    classesfield = JoinClassFields('Label', choices=sclasses, validators=[])
+    classesfield = FieldList(FormField(JoinClassFields), min_entries=1)
     submit = SubmitField('Join Classes')
-    

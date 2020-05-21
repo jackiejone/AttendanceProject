@@ -87,20 +87,14 @@ def logout():
 @app.route('/classes', methods=['GET', 'POST'])
 @login_required
 def classes():
-    form = JoinClassForm()
-
-    # Handing form post request
+    classes = SubjectCode.query.all()
+    sclasses = [{str(x.id): x.name} for x in classes]
+    print(sclasses)
+    form = JoinClassForm(classesfield=sclasses)
+    # https://wtforms.readthedocs.io/en/latest/crash_course/
+    # Handling form post reqeust for adding a user to multiple classes
     if request.method == 'POST' and form.validate_on_submit():
-        formdata = []
-        for x in form.classesfield.data:
-            try:
-                formdata.append(int(x))
-            except ValueError:
-                flash('Invalid class')
-                print("Failed {}".format(x))
-            else:
-                print("Passed {}".format(x))
-        """
+        formdata = [int(x) for x in form.classesfield.data]
         for sub_id in formdata:
             add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id, user_type=current_user.auth)
             user_subjects = UserSubject.query.filter_by(user_id=current_user.id, subject_id=sub_id).first()
@@ -113,15 +107,9 @@ def classes():
                 except:
                     db.session.rollback()
                 else:
-                    db.session.commit()"""
+                    db.session.commit()
         return render_template('my_classes.html', form=form, formdata=formdata)
-    elif request.method == 'GET':
-        return render_template('my_classes.html', form=form, formdata=None)
-    
-    elif request.method == 'POST' and not form.validate_on_submit():
-        print(type(form.errors))
-        print(form.errors)
-        return render_template('my_classes.html', form=form, formdata=None)
+    return render_template('my_classes.html', form=form, formdata=None)
 
 # Function to create unique alphanumeric codes
 def generate_code():
