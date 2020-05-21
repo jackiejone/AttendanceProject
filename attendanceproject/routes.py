@@ -88,13 +88,15 @@ def logout():
 @login_required
 def classes():
     classes = SubjectCode.query.all()
-    sclasses = [{str(x.id): x.name} for x in classes]
-    form = JoinClassForm(classesfield=JoinClassFields(choices=sclasses))
-    print(form.classesfield)
+    sclasses = [(str(x.id), x.name) for x in classes]
+    form = JoinClassForm()
+    form.classes.choices = sclasses
+    print(form.classes)
+    # https://gist.github.com/ectrimble20/468156763a1389a913089782ab0f272e
     # https://wtforms.readthedocs.io/en/latest/crash_course/
     # Handling form post reqeust for adding a user to multiple classes
     if request.method == 'POST' and form.validate_on_submit():
-        formdata = [int(x) for x in form.classesfield.data]
+        formdata = [int(x) for x in form.classes.data]
         for sub_id in formdata:
             add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id, user_type=current_user.auth)
             user_subjects = UserSubject.query.filter_by(user_id=current_user.id, subject_id=sub_id).first()

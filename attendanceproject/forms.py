@@ -57,11 +57,11 @@ class CreateClassForm(FlaskForm):
 
 
 # Dynamic boolean fields for each class
-class JoinClassFields(SelectMultipleField):
+class MultiCheckboxField(SelectMultipleField):
     widget = ListWidget(prefix_label=False)
     option_widget = CheckboxInput()
 
 # Form for joining classes using boolean fields
 class JoinClassForm(FlaskForm):
-    classesfield = None
+    classes = MultiCheckboxField('Classes')
     submit = SubmitField('Join Classes')
