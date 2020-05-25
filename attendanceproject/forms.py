@@ -61,7 +61,11 @@ class MultiCheckboxField(SelectMultipleField):
     widget = ListWidget(prefix_label=False)
     option_widget = CheckboxInput()
 
+def my_length_check(form, field):
+    if len(field.data) > 6 :
+        raise ValidationError('Maxmium number of classes which can be selected is 6')
+
 # Form for joining classes using boolean fields
 class JoinClassForm(FlaskForm):
-    classes = MultiCheckboxField('Classes', coerce=int)
+    classes = MultiCheckboxField('Classes', coerce=int, validators=[my_length_check])
     submit = SubmitField('Join Classes')

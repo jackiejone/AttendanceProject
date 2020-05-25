@@ -83,7 +83,7 @@ def logout():
     # Redirects the user to the home page
     return redirect(url_for('home'))
 
-# Classes Route
+# Classes Route         Change from current user to the user selected
 @app.route('/classes', methods=['GET', 'POST'])
 @login_required
 def classes():
@@ -92,18 +92,17 @@ def classes():
     sclasses = [(x.id, x.name) for x in classes]
     form = JoinClassForm()
     form.classes.choices = sclasses
-    print(form.classes)
     # Handling form post reqeust for adding a user to multiple classes
     if request.method == 'POST' and form.validate_on_submit():
         formdata = form.classes.data
         # Stopping user to join class if they already have 6 classes or amount
         # of choices exceede maxmium of 6 classes
-        if (UserSubject.query.filter_by(user_id=current_user.id).count() > 6
-            or len(formdata) > 6
+        print(len(current_user.subjects))
+        if (len(current_user.subjects) > 6
             or len(formdata) + UserSubject.query.filter_by(user_id=current_user.id).count() > 6):
-            flash('Maximium classes a user can have is 6') # FIX STATEMENT SO IT IGNORES CLASSES ALREADY JOINED
+            flash('''Maximium classes a user can have is 6, the amount of classes you have have selected
+            to enrol the user into causes the user to exceede the maxmium amount of classes''')
             return render_template('my_classes.html', form=form, formdata=None)
-        
         else:
             for sub_id in formdata:
                 add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id, user_type=current_user.auth)
