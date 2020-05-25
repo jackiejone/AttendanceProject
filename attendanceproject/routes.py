@@ -121,7 +121,19 @@ def classes():
                 return render_template('my_classes.html', form=form, formdata=formdata)
         return render_template('my_classes.html', form=form, formdata=None)
     else:
+        # https://stackoverflow.com/questions/39765548/form-validation-in-another-route-flask
         form = CodeJoinForm()
+        if request.method == 'POST' and form.validate_on_submit():
+            join_class = SubjectCode.query.filter_by(join_code=form.code.data).first()
+            if join_class:
+                add_user_subject = UserSubject(user_id=current_user.id,
+                                               subject_id=join_class.id,
+                                               user_type=current_user.auth)
+                db.session.add(add_user_subject)
+                db.session.commit()
+                # ERROR HANDING, FLUSHING AND CHECKING IF THE USER HAS ALREADY JOINED ENOUGH CLASSES
+            else:
+                flash('Invalid Join Code1')
         return render_template('my_classes.html', form=form)
 
 # Function to create unique alphanumeric codes

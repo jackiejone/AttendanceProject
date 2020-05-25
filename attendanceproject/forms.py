@@ -64,13 +64,17 @@ class MultiCheckboxField(SelectMultipleField):
 def my_length_check(form, field):
     if len(field.data) > 6 :
         raise ValidationError('Maxmium number of classes which can be selected is 6')
-
+ 
 # Form for joining classes using boolean fields
 class JoinClassForm(FlaskForm):
     classes = MultiCheckboxField('Classes', coerce=int, validators=[my_length_check])
     submit = SubmitField('Join Classes')
 
+def class_check(form, field):
+    if not SubjectCode.query.filter_by(join_code=field.data).first():
+        raise ValidationError('Invalid Class Code')
+
 # Form for joining a class through the unique class code
 class CodeJoinForm(FlaskForm):
-    code = StringField('Code', validators=[InputRequired(), Length(min=6, max=6)])
+    code = StringField('Code', validators=[InputRequired(), Length(min=6, max=6, message='Field must be 6 characters long'), class_check], render_kw={'placeholder': '6 Letters'})
     join = SubmitField('Join Class')

@@ -5,6 +5,9 @@
     {% if current_user.auth == 'student' %}
         <form method='POST' action=''>
             {{ form.hidden_tag() }}
+            {% for error in form.code.errors %}
+                {{ error }}
+            {% endfor %}
             {{ form.code }}
             {{ form.join }}
         </form>
