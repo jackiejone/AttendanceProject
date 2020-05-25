@@ -5,7 +5,10 @@
             <li><a href="{{url_for('home')}}">Home</a></li>
             {% if current_user.is_authenticated %}
                 <li><a href="{{url_for('classes')}}">Classes</a></li>
-                <li><a href="{{url_for('class_code', class_code='test')}}">Specific class</a></li>
+                <li><a href="{{url_for('class_code', class_code='test')}}">Specific Class</a></li>
+                {% if current_user.auth == 'teacher' %}
+                    <li><a href="{{url_for('create_class')}}">New Class</a></li>
+                {% endif %}
             {% endif %}
         </div>
         <div id="nav-right">

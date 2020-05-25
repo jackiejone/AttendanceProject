@@ -69,3 +69,8 @@ def my_length_check(form, field):
 class JoinClassForm(FlaskForm):
     classes = MultiCheckboxField('Classes', coerce=int, validators=[my_length_check])
     submit = SubmitField('Join Classes')
+
+# Form for joining a class through the unique class code
+class CodeJoinForm(FlaskForm):
+    code = StringField('Code', validators=[InputRequired(), Length(min=6, max=6)])
+    join = SubmitField('Join Class')

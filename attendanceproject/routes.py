@@ -87,38 +87,42 @@ def logout():
 @app.route('/classes', methods=['GET', 'POST'])
 @login_required
 def classes():
-    # Dynamically creating booleanfields for each class
-    classes = SubjectCode.query.all()
-    sclasses = [(x.id, x.name) for x in classes]
-    form = JoinClassForm()
-    form.classes.choices = sclasses
-    # Handling form post reqeust for adding a user to multiple classes
-    if request.method == 'POST' and form.validate_on_submit():
-        formdata = form.classes.data
-        # Stopping user to join class if they already have 6 classes or amount
-        # of choices exceede maxmium of 6 classes
-        print(len(current_user.subjects))
-        if (len(current_user.subjects) > 6
-            or len(formdata) + UserSubject.query.filter_by(user_id=current_user.id).count() > 6):
-            flash('''Maximium classes a user can have is 6, the amount of classes you have have selected
-            to enrol the user into causes the user to exceede the maxmium amount of classes''')
-            return render_template('my_classes.html', form=form, formdata=None)
-        else:
-            for sub_id in formdata:
-                add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id, user_type=current_user.auth)
-                user_subjects = UserSubject.query.filter_by(user_id=current_user.id, subject_id=sub_id).first()
-                if user_subjects:
-                    continue
-                else:
-                    try:
-                        db.session.add(add_user_subject)
-                        db.session.flush()
-                    except:
-                        db.session.rollback()
+    if current_user.auth == 'teacher':
+        # Dynamically creating booleanfields for each class
+        classes = SubjectCode.query.all()
+        sclasses = [(x.id, x.name) for x in classes]
+        form = JoinClassForm()
+        form.classes.choices = sclasses
+        # Handling form post reqeust for adding a user to multiple classes
+        if request.method == 'POST' and form.validate_on_submit():
+            formdata = form.classes.data
+            # Stopping user to join class if they already have 6 classes or amount
+            # of choices exceede maxmium of 6 classes
+            print(len(current_user.subjects))
+            if (len(current_user.subjects) > 6
+                or len(formdata) + UserSubject.query.filter_by(user_id=current_user.id).count() > 6):
+                flash('''Maximium classes a user can have is 6, the amount of classes you have have selected
+                to enrol the user into causes the user to exceede the maxmium amount of classes''')
+                return render_template('my_classes.html', form=form, formdata=None)
+            else:
+                for sub_id in formdata:
+                    add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id, user_type=current_user.auth)
+                    user_subjects = UserSubject.query.filter_by(user_id=current_user.id, subject_id=sub_id).first()
+                    if user_subjects:
+                        continue
                     else:
-                        db.session.commit()
-            return render_template('my_classes.html', form=form, formdata=formdata)
-    return render_template('my_classes.html', form=form, formdata=None)
+                        try:
+                            db.session.add(add_user_subject)
+                            db.session.flush()
+                        except:
+                            db.session.rollback()
+                        else:
+                            db.session.commit()
+                return render_template('my_classes.html', form=form, formdata=formdata)
+        return render_template('my_classes.html', form=form, formdata=None)
+    else:
+        form = CodeJoinForm()
+        return render_template('my_classes.html', form=form)
 
 # Function to create unique alphanumeric codes
 def generate_code():

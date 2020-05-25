@@ -2,29 +2,38 @@
 {% block content %}
     <h1>my classes</h1>
 
-    <!-- Adding A student to multiple classes -->
-    {% if form.errors %}
-        <ul class='errors'>
-            {% for error in form.errors %}
-                {% for e in form.errors[error] %}
-                <li>{{ e }}</li>
+    {% if current_user.auth == 'student' %}
+        <form method='POST' action=''>
+            {{ form.hidden_tag() }}
+            {{ form.code }}
+            {{ form.join }}
+        </form>
+    {% endif %}
+
+    {% if current_user.auth == 'teacher' %}
+        <!-- Adding A student to multiple classes -->
+        {% if form.errors %}
+            <ul class='errors'>
+                {% for error in form.errors %}
+                    {% for e in form.errors[error] %}
+                    <li>{{ e }}</li>
+                    {% endfor %}
                 {% endfor %}
+            </ul>
+        {% endif %}
+        <form method='POST' action="">
+            {{ form.hidden_tag() }}
+            {{ form.classes }}
+            {{ form.submit }}
+        </form>
+
+        {% if formdata %}
+        <ul>
+            {% for i in formdata %}
+                <li>{{ i }}</li>
             {% endfor %}
         </ul>
+        {% endif %}
+        <!-- End of adding a student to multiple classes -->
     {% endif %}
-    <form method='POST' action="">
-        {{ form.hidden_tag() }}
-        {{ form.csrf_token }}
-        {{ form.classes }}
-        {{ form.submit }}
-    </form>
-
-    {% if formdata %}
-    <ul>
-        {% for i in formdata %}
-            <li>{{ i }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    <!-- End of adding a student to multiple classes -->
 {% endblock %}
