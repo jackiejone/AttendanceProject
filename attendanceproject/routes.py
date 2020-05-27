@@ -98,7 +98,6 @@ def classes():
             formdata = form.classes.data
             # Stopping user to join class if they already have 6 classes or amount
             # of choices exceede maxmium of 6 classes
-            print(len(current_user.subjects))
             if (len(current_user.subjects) > 6
                 or len(formdata) + UserSubject.query.filter_by(user_id=current_user.id).count() > 6):
                 flash('''Maximium classes a user can have is 6, the amount of classes you have have selected
@@ -125,15 +124,23 @@ def classes():
         form = CodeJoinForm()
         if request.method == 'POST' and form.validate_on_submit():
             join_class = SubjectCode.query.filter_by(join_code=form.code.data).first()
-            if join_class:
-                add_user_subject = UserSubject(user_id=current_user.id,
-                                               subject_id=join_class.id,
-                                               user_type=current_user.auth)
-                db.session.add(add_user_subject)
-                db.session.commit()
-                # ERROR HANDING, FLUSHING AND CHECKING IF THE USER HAS ALREADY JOINED ENOUGH CLASSES
+            if join_class and join_class.id not in [x.id for x in current_user.subjects]:
+                if join_class.id in [x.subject_id for x in current_user.subjects]:
+                    flash('You have already joined this class')
+                else:
+                    add_user_subject = UserSubject(user_id=current_user.id,
+                                                subject_id=join_class.id,
+                                                user_type=current_user.auth)
+                    try:
+                        db.session.add(add_user_subject)
+                        db.session.flush()
+                    except:
+                        flash('Could not join the class')
+                    else:
+                        db.session.commit()
+                        flash('Successfully joined class')
             else:
-                flash('Invalid Join Code1')
+                flash('Invalid Join Code1 or you have already join that class')
         return render_template('my_classes.html', form=form)
 
 # Function to create unique alphanumeric codes
