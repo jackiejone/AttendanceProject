@@ -80,14 +80,18 @@ def logout():
     if current_user.is_authenticated:
         # Logs out the user
         logout_user()
+        flash('Successfully Logged out')
     # Redirects the user to the home page
     return redirect(url_for('home'))
 
-# Classes Route         Change from current user to the user selected
+# Classes Route         TODO: Change from current user to the user selected
 @app.route('/classes', methods=['GET', 'POST'])
 @login_required
 def classes():
+    # Distingusts between different types of users, teachers and students to
+    # present different functions to each party
     if current_user.auth == 'teacher':
+        # Display and validation of form if the user is a teacher
         # Dynamically creating booleanfields for each class
         classes = SubjectCode.query.all()
         sclasses = [(x.id, x.name) for x in classes]
@@ -104,8 +108,12 @@ def classes():
                 to enrol the user into causes the user to exceede the maxmium amount of classes''')
                 return render_template('my_classes.html', form=form, formdata=None)
             else:
+                # Adds the user to the classes based on the selected fields from the form
                 for sub_id in formdata:
                     add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id, user_type=current_user.auth)
+                    # Checks if the user is already assocated with the class by
+                    # querying the database table with filtered with the user's id and the 
+                    # subject's id
                     user_subjects = UserSubject.query.filter_by(user_id=current_user.id, subject_id=sub_id).first()
                     if user_subjects:
                         continue
@@ -113,20 +121,25 @@ def classes():
                         try:
                             db.session.add(add_user_subject)
                             db.session.flush()
-                        except:
+                        except IntegrityError:
                             db.session.rollback()
                         else:
                             db.session.commit()
                 return render_template('my_classes.html', form=form, formdata=formdata)
         return render_template('my_classes.html', form=form, formdata=None)
     else:
-        # https://stackoverflow.com/questions/39765548/form-validation-in-another-route-flask
+        # Display and validation of form if the user is not a teacher, a student
         form = CodeJoinForm()
         if request.method == 'POST' and form.validate_on_submit():
+            # Queries the database for the subject based on the join code that
+            # was entered into the form
             join_class = SubjectCode.query.filter_by(join_code=form.code.data).first()
-            if join_class and join_class.id not in [x.id for x in current_user.subjects]:
+            # Checks if the class exists by checking if there is data returned from the database
+            if join_class:
+                #  Checks if the user is already associated with the suject/in the subject(in the class)
                 if join_class.id in [x.subject_id for x in current_user.subjects]:
                     flash('You have already joined this class')
+                # Associating the user with the class
                 else:
                     add_user_subject = UserSubject(user_id=current_user.id,
                                                 subject_id=join_class.id,
@@ -134,13 +147,13 @@ def classes():
                     try:
                         db.session.add(add_user_subject)
                         db.session.flush()
-                    except:
+                    except IntegrityError:
                         flash('Could not join the class')
                     else:
                         db.session.commit()
                         flash('Successfully joined class')
             else:
-                flash('Invalid Join Code1 or you have already join that class')
+                flash('Invalid Join Code')
         return render_template('my_classes.html', form=form)
 
 # Function to create unique alphanumeric codes
