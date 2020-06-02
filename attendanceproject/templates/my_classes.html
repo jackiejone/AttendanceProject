@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>my classes</h1>
+    <h2>{{ user.fname }} {{ user.lname }} {{ user.student_code }}</h2>
+
 
     {% if current_user.auth == 'student' %}
         <form method='POST' action=''>

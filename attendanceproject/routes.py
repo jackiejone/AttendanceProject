@@ -106,19 +106,19 @@ def classes(user_code):
             formdata = form.classes.data
             # Stopping user to join class if they already have 6 classes or amount
             # of choices exceede maxmium of 6 classes
-            if (len(current_user.subjects) > 6
-                or len(formdata) + UserSubject.query.filter_by(user_id=current_user.id).count() > 6):
+            if (len(user.subjects) > 6
+                or len(formdata) + UserSubject.query.filter_by(user_id=user.id).count() > 6):
                 flash('''Maximium classes a user can have is 6, the amount of classes you have have selected
                 to enrol the user into causes the user to exceede the maxmium amount of classes''')
                 return render_template('my_classes.html', form=form, formdata=None)
             else:
                 # Adds the user to the classes based on the selected fields from the form
                 for sub_id in formdata:
-                    add_user_subject = UserSubject(user_id=current_user.id, subject_id=sub_id, user_type=current_user.auth)
+                    add_user_subject = UserSubject(user_id=user.id, subject_id=sub_id, user_type=user.auth)
                     # Checks if the user is already assocated with the class by
                     # querying the database table with filtered with the user's id and the 
                     # subject's id
-                    user_subjects = UserSubject.query.filter_by(user_id=current_user.id, subject_id=sub_id).first()
+                    user_subjects = UserSubject.query.filter_by(user_id=user.id, subject_id=sub_id).first()
                     if user_subjects:
                         continue
                     else:
@@ -129,8 +129,8 @@ def classes(user_code):
                             db.session.rollback()
                         else:
                             db.session.commit()
-                return render_template('my_classes.html', form=form, formdata=formdata)
-        return render_template('my_classes.html', form=form, formdata=None)
+                return render_template('my_classes.html', form=form, formdata=formdata, user=user)
+        return render_template('my_classes.html', form=form, formdata=None, user=user)
     else:
         if user_code != str(current_user.student_code): # TOD : Change this to without 'str' after database change
             flash("You cannot access this page")
@@ -164,7 +164,7 @@ def classes(user_code):
                         flash('Successfully joined class')
             else:
                 flash('Invalid Join Code')
-        return render_template('my_classes.html', form=form)
+        return render_template('my_classes.html', form=form, user=current_user)
 
 # Function to create unique alphanumeric codes
 def generate_code():
@@ -232,3 +232,9 @@ def class_code(class_code):
 @login_required
 def account(user):
     return render_template("account.html")
+
+
+# Route for handling error 404
+@app.errorhandler(404)
+def error404(e):
+    return render_template('error404.html')
