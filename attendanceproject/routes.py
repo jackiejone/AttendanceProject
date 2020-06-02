@@ -28,13 +28,13 @@ def register():
         fname = form.fname.data.capitalize().strip().lower()
         lname = form.lname.data.capitalize().strip().lower()
         email = form.email.data.strip().lower()
-        student_code = form.std_code.data.strip().lower()
+        user_code = form.std_code.data.strip().lower()
         # Generates hashed password using SHA256 encryption method
         hashed_password = generate_password_hash(form.password.data, method='sha256')
         # Defines new user object to add to database
         user = User(fname=fname, lname=lname,
-                    student_code=student_code, email=email,
-                    password=hashed_password)
+                    user_code=user_code, email=email,
+                    password=hashed_password, auth='student')
         # Error checking to check if the user already exsists in the database
         try:
             db.session.add(user)
@@ -85,16 +85,16 @@ def logout():
     return redirect(url_for('home'))
 
 # Classes Route         TODO: Change from current user to the user selected
-@app.route('/classes/<user_code>', methods=['GET', 'POST'])
+@app.route('/account/<user_code>/classes', methods=['GET', 'POST'])
 @login_required
 def classes(user_code):
     # Distingusts between different types of users, teachers and students to
     # present different functions to each party
     if current_user.auth == 'teacher':
-        user = User.query.filter_by(student_code=user_code).first()
+        user = User.query.filter_by(user_code=user_code).first()
         if not user:
             flash('User not found')
-            return redirect(url_for('classes', user_code=current_user.student_code))
+            return redirect(url_for('classes', user_code=current_user.user_code))
         # Display and validation of form if the user is a teacher
         # Dynamically creating booleanfields for each class
         classes = SubjectCode.query.all()
@@ -132,12 +132,9 @@ def classes(user_code):
                 return render_template('my_classes.html', form=form, formdata=formdata)
         return render_template('my_classes.html', form=form, formdata=None)
     else:
-        if user_code != str(current_user.student_code): # TOD : Change this to without 'str' after database change
+        if user_code != current_user.user_code: # TOD : Change this to without 'str' after database change
             flash("You cannot access this page")
-            print('got here') # Remove this
-            print(user_code)
-            print(current_user.student_code)
-            return redirect(url_for('classes', user_code=current_user.student_code))
+            return redirect(url_for('classes', user_code=current_user.user_code))
         # Display and validation of form if the user is not a teacher, a student
         form = CodeJoinForm()
         if request.method == 'POST' and form.validate_on_submit():
@@ -231,4 +228,8 @@ def class_code(class_code):
 @app.route('/account/<user>')
 @login_required
 def account(user):
-    return render_template("account.html")
+    return render_template("account.html", user=user)
+
+@app.errorhandler(404)
+def erro404(e):
+    return render_template('error404.html')
