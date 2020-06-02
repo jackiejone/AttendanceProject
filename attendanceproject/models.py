@@ -10,7 +10,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     fname = db.Column(db.Text(20), nullable=False)
     lname = db.Column(db.Text(20), nullable=False)
-    student_code = db.Column(db.Integer, nullable=False, unique=True)
+    student_code = db.Column(db.Text(6), nullable=False, unique=True)
     email = db.Column(db.Text(50), nullable=False, unique=True)
     password = db.Column(db.Text(80), nullable=False)
     auth = db.Column(db.Text(10), nullable=True)

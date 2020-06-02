@@ -85,12 +85,16 @@ def logout():
     return redirect(url_for('home'))
 
 # Classes Route         TODO: Change from current user to the user selected
-@app.route('/classes', methods=['GET', 'POST'])
+@app.route('/classes/<user_code>', methods=['GET', 'POST'])
 @login_required
-def classes():
+def classes(user_code):
     # Distingusts between different types of users, teachers and students to
     # present different functions to each party
     if current_user.auth == 'teacher':
+        user = User.query.filter_by(student_code=user_code).first()
+        if not user:
+            flash('User not found')
+            return redirect(url_for('classes', user_code=current_user.student_code))
         # Display and validation of form if the user is a teacher
         # Dynamically creating booleanfields for each class
         classes = SubjectCode.query.all()
@@ -128,6 +132,12 @@ def classes():
                 return render_template('my_classes.html', form=form, formdata=formdata)
         return render_template('my_classes.html', form=form, formdata=None)
     else:
+        if user_code != str(current_user.student_code): # TOD : Change this to without 'str' after database change
+            flash("You cannot access this page")
+            print('got here') # Remove this
+            print(user_code)
+            print(current_user.student_code)
+            return redirect(url_for('classes', user_code=current_user.student_code))
         # Display and validation of form if the user is not a teacher, a student
         form = CodeJoinForm()
         if request.method == 'POST' and form.validate_on_submit():

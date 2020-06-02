@@ -6,12 +6,6 @@ from wtforms.validators import Length, InputRequired, Email, EqualTo, Validation
 from attendanceproject.models import *
 from flask_login import current_user
 
-# Form for checking if the value which the user inputs into the form is an interger or not
-def int_check(form, field):
-    try:
-        int(field.data)
-    except ValueError:
-        raise ValidationError('Student Code must be a whole number')
 
 # form for registering to the application
 class RegisterForm(FlaskForm):
@@ -25,8 +19,8 @@ class RegisterForm(FlaskForm):
                         render_kw={"placeholder": "Last Name"})
     std_code = StringField('Student Code',
                            validators=[InputRequired(message='Field Required'),
-                                       Length(min=5, max=6, message='Student Code can only be 5 or 6 characters long'),
-                                       int_check],
+                                       Length(min=5, max=6,
+                                              message='Student Code can only be 5 or 6 characters long')],
                            render_kw={"placeholder": "Student Code"})
     email = StringField('Email', validators=[InputRequired(message='Field Required'),
                                              Email(message='Invalid Email Address')],
