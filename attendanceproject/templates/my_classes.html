@@ -3,8 +3,8 @@
     <h1>my classes</h1>
     <h2>{{ user.fname }} {{ user.lname }} {{ user.student_code }}</h2>
 
-
-    {% if current_user.auth == 'student' %}
+    {% if user.auth == 'student' %}
+        {% if form.code %}
         <form method='POST' action=''>
             {{ form.hidden_tag() }}
             {% for error in form.code.errors %}
@@ -13,6 +13,7 @@
             {{ form.code }}
             {{ form.join }}
         </form>
+        {% endif %}
     {% endif %}
 
     {% if current_user.auth == 'teacher' %}
@@ -31,14 +32,12 @@
             {{ form.classes }}
             {{ form.submit }}
         </form>
-
-        {% if formdata %}
-        <ul>
-            {% for i in formdata %}
-                <li>{{ i }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
         <!-- End of adding a student to multiple classes -->
+    {% endif %}
+
+    {% if user_classes %}
+        {% for class in user_classes %}
+            <p>{{ class }}</p>
+        {% endfor %}
     {% endif %}
 {% endblock %}

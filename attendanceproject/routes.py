@@ -6,7 +6,7 @@ from flask_login import (login_user, login_required,
                          logout_user, current_user,
                          fresh_login_required)
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from string import ascii_letters, digits
 from random import choice
 
@@ -84,7 +84,11 @@ def logout():
     # Redirects the user to the home page
     return redirect(url_for('home'))
 
-# Classes Route         TODO: Change from current user to the user selected
+# Function for putting the name of the user's subjects into a list
+def subject_name(user):
+    return [x.subject.name for x in user.subjects]
+
+# Classes Route
 @app.route('/account/<user_code>/classes', methods=['GET', 'POST'])
 @login_required
 def classes(user_code):
@@ -95,6 +99,8 @@ def classes(user_code):
         if not user:
             flash('User not found')
             return redirect(url_for('classes', user_code=current_user.user_code))
+        else:
+            user_classes = subject_name(user)
         # Display and validation of form if the user is a teacher
         # Dynamically creating booleanfields for each class
         classes = SubjectCode.query.all()
@@ -110,7 +116,7 @@ def classes(user_code):
                 or len(formdata) + UserSubject.query.filter_by(user_id=user.id).count() > 6):
                 flash('''Maximium classes a user can have is 6, the amount of classes you have have selected
                 to enrol the user into causes the user to exceede the maxmium amount of classes''')
-                return render_template('my_classes.html', form=form, formdata=None)
+                return render_template('my_classes.html', form=form, formdata=None, user=user, user_classes=user_classes)
             else:
                 # Adds the user to the classes based on the selected fields from the form
                 for sub_id in formdata:
@@ -129,10 +135,13 @@ def classes(user_code):
                             db.session.rollback()
                         else:
                             db.session.commit()
-                return render_template('my_classes.html', form=form, formdata=formdata, user=user)
-        return render_template('my_classes.html', form=form, formdata=None, user=user)
+                            # Refresh user affter change in database
+                            user = User.query.filter_by(user_code=user_code).first()
+        user_classes = subject_name(user) # Getting a list of the user's subjects/classes
+        return render_template('my_classes.html', form=form, user=user, user_classes=user_classes)
+
     else:
-        if user_code != current_user.user_code: # TOD : Change this to without 'str' after database change
+        if user_code != current_user.user_code:
             flash("You cannot access this page")
             return redirect(url_for('classes', user_code=current_user.user_code))
         # Display and validation of form if the user is not a teacher, a student
@@ -161,7 +170,8 @@ def classes(user_code):
                         flash('Successfully joined class')
             else:
                 flash('Invalid Join Code')
-        return render_template('my_classes.html', form=form, user=current_user)
+        user_classes = subject_name(current_user) # Getting a list of the user's subjects/classes
+        return render_template('my_classes.html', form=form, user=current_user, user_classes=user_classes)
 
 # Function to create unique alphanumeric codes
 def generate_code():
@@ -180,13 +190,13 @@ def generate_code():
 @app.route('/new_class', methods=['GET', 'POST'])
 @login_required
 def create_class():
-    form = CreateClassForm()
     # Checking if the user accessing the page is a teacher
     if current_user.auth != "teacher":
         flash("You do not have permission to access this page")
         # Redirects the user back to the home page if they're not a teacher
         return redirect(url_for('home'))
     
+    form = CreateClassForm()
     # Checks for POST request and valid form
     if request.method == 'POST' and form.validate_on_submit():
         # Prepares form data For insertion into database
@@ -204,18 +214,23 @@ def create_class():
             db.session.flush()
         except IntegrityError:
             flash('Class Code Already Taken')
+            db.session.rollback()
         else:
             # If there is no error returned, the class is added to the database and
             # the teacher who created the class is also associated with the class
             db.session.commit()
             flash('Class Successfully Added')
             # Associating the teacher with the class
-            if form.auto_add.data == True:
-                user = User.query.filter_by(id=current_user.id).first()
-                asso = UserSubject(user_type='teacher')
-                asso.subject = new_class
-                user.subjects.append(asso)
-                db.session.commit()
+            if form.auto_add.data:
+                if len(current_user.subjects) >= 6:
+                    flash("Maxmium number of classes reached. You we're not added to the class")
+                else:
+                    user = User.query.filter_by(id=current_user.id).first()
+                    asso = UserSubject(user_type='teacher')
+                    asso.subject = new_class
+                    user.subjects.append(asso)
+                    db.session.rollback()
+
     return render_template('create_class.html', form=form)
 
 # Individual class route
@@ -228,17 +243,10 @@ def class_code(class_code):
 @app.route('/account/<user>')
 @login_required
 def account(user):
-<<<<<<< HEAD
     return render_template("account.html")
 
 
 # Route for handling error 404
 @app.errorhandler(404)
 def error404(e):
-=======
-    return render_template("account.html", user=user)
-
-@app.errorhandler(404)
-def erro404(e):
->>>>>>> e89dd5d2bce270d7ab2cf8ab3caeab3629dcd7ee
     return render_template('error404.html')

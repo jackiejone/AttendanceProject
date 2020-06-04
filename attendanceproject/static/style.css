@@ -63,7 +63,8 @@ body {
   color: var(--errors);
   width: auto;
   text-align: center;
-  min-width: 550px
+  min-width: 550px;
+  padding: 0;
 }
 
 /* Form Fields */
