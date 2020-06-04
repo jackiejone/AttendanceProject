@@ -86,7 +86,7 @@ def logout():
 
 # Function for putting the name of the user's subjects into a list
 def subject_name(user):
-    return [x.subject.name for x in user.subjects]
+    return [x.subject for x in user.subjects]
 
 # Classes Route
 @app.route('/account/<user_code>/classes', methods=['GET', 'POST'])
@@ -100,7 +100,7 @@ def classes(user_code):
             flash('User not found')
             return redirect(url_for('classes', user_code=current_user.user_code))
         else:
-            user_classes = subject_name(user)
+            user_classes = subject_name(user) # Getting a list of the user's subjects
         # Display and validation of form if the user is a teacher
         # Dynamically creating booleanfields for each class
         classes = SubjectCode.query.all()
@@ -122,8 +122,7 @@ def classes(user_code):
                 for sub_id in formdata:
                     add_user_subject = UserSubject(user_id=user.id, subject_id=sub_id, user_type=user.auth)
                     # Checks if the user is already assocated with the class by
-                    # querying the database table with filtered with the user's id and the 
-                    # subject's id
+                    # querying the database table with filtered with the user's id and the subject's id
                     user_subjects = UserSubject.query.filter_by(user_id=user.id, subject_id=sub_id).first()
                     if user_subjects:
                         continue
@@ -153,6 +152,7 @@ def classes(user_code):
             # Checks if the class exists by checking if there is data returned from the database
             if join_class:
                 #  Checks if the user is already associated with the suject/in the subject(in the class)
+                # TODO : Turn this into a function \/
                 if join_class.id in [x.subject_id for x in current_user.subjects]:
                     flash('You have already joined this class')
                 # Associating the user with the class
@@ -237,6 +237,12 @@ def create_class():
 @app.route('/classes/<class_code>')
 @login_required
 def class_code(class_code):
+    if (current_user.auth == 'teacher'
+        and class_code in
+        [x.subject.code for x in current_user.subjects]):
+        print('yes')
+    else:
+        print('no')
     return render_template("class.html")
 
 # Account Route
