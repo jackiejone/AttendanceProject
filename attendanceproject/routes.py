@@ -251,6 +251,9 @@ def class_code(class_code):
 def account(user):
     return render_template("account.html")
 
+@app.route('/logtime/<user_code>')
+def logtime(user_code):
+    return None
 
 # Route for handling error 404
 @app.errorhandler(404)

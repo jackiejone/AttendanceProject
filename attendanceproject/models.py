@@ -59,14 +59,21 @@ class AttendanceTime(db.Model):
     __tablename__ = "attnd_time"
     
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    time = db.Column(db.Time, nullable=False) # Time field
+    time = db.Column(db.DateTime, nullable=False) # Time field
     subject = db.Column(db.Integer, db.ForeignKey('user_subject.id'), nullable=False)
+    attnd_status = db.Column(db.Text(10))
 
 class SubjectTimes(db.Model):
-    __tablename__ = "subject_times"
+    __tablename__ = "subject_time"
     
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     subject = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False)
-    s_time = db.Column(db.Time, nullable=False)
-    
-    
+    stime_id = db.Column(db.Integer, db.ForeignKey('times.id'))
+    stime = db.relationship('Times', back_populates='subject_times')
+    sweek = db.Column(db.Integer, nullable=False)
+
+class Times(db.Model):
+    __tablename__ = "times"
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    time = db.Column(db.Time, unique=True, nullable=False)
+    subject_times = db.relationship('SubjectTimes', back_populates='stime')
