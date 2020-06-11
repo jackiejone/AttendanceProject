@@ -31,17 +31,6 @@ class Tag(db.Model):
     tag_uid = db.Column(db.Text(50), nullable=False, unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-# Names and codes for each subject which a student could have
-class SubjectCode(db.Model):
-    __tablename__ = "subject_code"
-    
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    name = db.Column(db.Text(50), nullable=False)
-    code = db.Column(db.Text(50), unique=True, nullable=False)
-    join_code = db.Column(db.Text(10), unique=True, nullable=False)
-    users = db.relationship('UserSubject', back_populates='subject')
-    times = db.relationship('SubjectTimes', backref='subjects')
-
 # Association table bewtween User and their subject/s (class/es)
 class UserSubject(db.Model):
     __tablename__ = "user_subject"
@@ -63,17 +52,33 @@ class AttendanceTime(db.Model):
     subject = db.Column(db.Integer, db.ForeignKey('user_subject.id'), nullable=False)
     attnd_status = db.Column(db.Text(10))
 
+# Table for associating the time which a subject is on to the subject
 class SubjectTimes(db.Model):
     __tablename__ = "subject_time"
     
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    subject = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False)
-    stime_id = db.Column(db.Integer, db.ForeignKey('times.id'))
-    stime = db.relationship('Times', back_populates='subject_times')
+    subject_id = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False)
+    stime_id = db.Column(db.Integer, db.ForeignKey('times.id'), nullable=False)
     sweek = db.Column(db.Integer, nullable=False)
+    time = db.relationship('Times', back_populates='subjects')
+    subject = db.relationship('SubjectCode', back_populates='times')
 
+# Names and codes for each subject which a student could have
+class SubjectCode(db.Model):
+    __tablename__ = "subject_code"
+    
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    name = db.Column(db.Text(50), nullable=False)
+    code = db.Column(db.Text(50), unique=True, nullable=False)
+    join_code = db.Column(db.Text(10), unique=True, nullable=False)
+    users = db.relationship('UserSubject', back_populates='subject')
+    times = db.relationship('SubjectTimes', back_populates='subject')
+
+# Table for storing the possible times for a class
 class Times(db.Model):
     __tablename__ = "times"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    time = db.Column(db.Time, unique=True, nullable=False)
-    subject_times = db.relationship('SubjectTimes', back_populates='stime')
+    start_time = db.Column(db.DateTime, unique=True, nullable=False)
+    end_time = db.Column(db.Time, unique=True, nullable=False)
+    subjects = db.relationship("SubjectTimes", back_populates='time')
+
