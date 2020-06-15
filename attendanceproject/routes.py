@@ -88,7 +88,7 @@ def logout():
 def subject_name(user):
     return [x.subject for x in user.subjects]
 
-# Classes Route
+# Classes Route TODO: Split up this route
 @app.route('/account/<user_code>/classes', methods=['GET', 'POST'])
 @login_required
 def classes(user_code):
