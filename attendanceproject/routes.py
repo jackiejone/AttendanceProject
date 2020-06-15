@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from string import ascii_letters, digits
 from random import choice
-
+import datetime
 
 # Home Route
 @app.route('/', methods=["GET"])
@@ -251,6 +251,24 @@ def class_code(class_code):
 def account(user):
     return render_template("account.html")
 
+@app.route('/logtime/<user_code>')
+def logtime(user_code):
+    return None
+
+@app.route('/settime', methods=['GET', 'POST'])
+@login_required
+def settime():
+    if current_user.auth != 'teacher':
+        return redirect(url_for('home'))
+    
+    form = AddTimesForm()
+    if request.method == "POST" and form.validate_on_submit():
+        for i in form:
+            print(i.data)
+            print(type(i.data))
+            if type(i.data) == datetime.time:
+                print('Class,True')
+    return render_template('settime.html', form=form)
 
 # Route for handling error 404
 @app.errorhandler(404)

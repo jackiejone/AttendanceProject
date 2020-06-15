@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+        <h1>Login</h1>
+        
+        <!-- Form for logging in -->
+        <form action='' method='POST'>
+            {{ form.csrf_token }}
+            {{ form.time1.label }} {{ form.time1 }}</br>
+            {{ form.time2.label }} {{ form.time2 }}</br>
+            {{ form.time3.label }} {{ form.time3 }}</br>
+            {{ form.time4.label }} {{ form.time4 }}</br>
+            {{ form.time5.label }} {{ form.time5 }}</br>
+            {{ form.add_time }}
+        </form>
+{% endblock %}
