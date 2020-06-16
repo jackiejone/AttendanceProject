@@ -78,7 +78,7 @@ class SubjectCode(db.Model):
 class Times(db.Model):
     __tablename__ = "times"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    start_time = db.Column(db.DateTime, unique=True, nullable=False)
+    start_time = db.Column(db.Time, unique=True, nullable=False)
     end_time = db.Column(db.Time, unique=True, nullable=False)
     subjects = db.relationship("SubjectTimes", back_populates='time')
 

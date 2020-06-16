@@ -255,22 +255,26 @@ def account(user):
 def logtime(user_code):
     return None
 
-@app.route('/classes/<class_code>/settime', methods=['GET', 'POST'])
+@app.route('/settimes', methods=['GET', 'POST'])
 @login_required
-def settime(class_code):
+def settime():
     if current_user.auth != 'teacher':
         return redirect(url_for('home'))
-    subject = SubjectCode.query.filter_by(code=class_code)
-    if not subject:
-        flash('Class not found')
-        return render_template(url_for('classes', user_code=current_user.user_code))
     
     form = AddTimesForm()
     if request.method == "POST" and form.validate_on_submit():
         for i in form:
-            time = Times(start_time=i.data, end_time=i.data+datetime.timedelta(hours=1))
-            db.session.add(time)
-            db.session.commit()
+            if type(i.data) == datetime.time:
+                if i.data <= datetime.time(hour=13, minute=40) and i.data >= datetime.time(hour=8, minute=15):
+                    print('within range')
+                else:
+                    print('not within range')
+                dtime = datetime.datetime.combine(datetime.date(2000, 1, 1), i.data)
+                end_time = dtime + datetime.timedelta(hours=1)
+                time = Times(start_time=i.data, end_time=end_time.time())
+                db.session.add(time)
+                db.session.commit()
+        flash('Times added')
     return render_template('settime.html', form=form)
 
 # Route for handling error 404
