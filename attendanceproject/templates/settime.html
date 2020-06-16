@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
-        <h1>Login</h1>
+        <h1>Setttimes</h1>
         
-        <!-- Form for logging in -->
+        <!-- Form for setting the default times which each class can be -->
         <form action='' method='POST'>
             {{ form.csrf_token }}
-            {{ form.time1.label }} {{ form.time1 }}</br>
-            {{ form.time2.label }} {{ form.time2 }}</br>
-            {{ form.time3.label }} {{ form.time3 }}</br>
-            {{ form.time4.label }} {{ form.time4 }}</br>
-            {{ form.time5.label }} {{ form.time5 }}</br>
+            {{ form.time1.label }} {{ form.time1 }} {{ form.time1.errors }}<br>
+            {{ form.time2.label }} {{ form.time2 }} {{ form.time2.errors }}<br>
+            {{ form.time3.label }} {{ form.time3 }} {{ form.time3.errors }}<br>
+            {{ form.time4.label }} {{ form.time4 }} {{ form.time4.errors }}<br>
+            {{ form.time5.label }} {{ form.time5 }} {{ form.time5.errors }}<br>
             {{ form.add_time }}
         </form>
 {% endblock %}

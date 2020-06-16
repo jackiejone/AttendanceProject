@@ -6,6 +6,7 @@ from wtforms.validators import Length, InputRequired, Email, EqualTo, Validation
 from wtforms.fields.html5 import TimeField
 from attendanceproject.models import *
 from flask_login import current_user
+import datetime
 
 
 # form for registering to the application
@@ -91,10 +92,14 @@ class CodeJoinForm(FlaskForm):
                                            class_check, class_num_check], render_kw={'placeholder': '6 Letters'})
     join = SubmitField('Join Class')
 
+def check_time(form, field):
+    if field.data > datetime.time(hour=13, minute=40) or field.data < datetime.time(hour=8, minute=15):
+        raise ValidationError(message="Minium Time is 8.15am and Maxium Time is 1.40pm")
+
 class AddTimesForm(FlaskForm):
-    time1 = TimeField(label='Period 1', format='%H:%M')
-    time2 = TimeField(label='Period 2', format='%H:%M')
-    time3 = TimeField(label='Period 3', format='%H:%M')
-    time4 = TimeField(label='Period 4', format='%H:%M')
-    time5 = TimeField(label='Period 5', format='%H:%M')
+    time1 = TimeField(label='Period 1', format='%H:%M', validators=[check_time, InputRequired()])
+    time2 = TimeField(label='Period 2', format='%H:%M', validators=[check_time, InputRequired()])
+    time3 = TimeField(label='Period 3', format='%H:%M', validators=[check_time, InputRequired()])
+    time4 = TimeField(label='Period 4', format='%H:%M', validators=[check_time, InputRequired()])
+    time5 = TimeField(label='Period 5', format='%H:%M', validators=[check_time, InputRequired()])
     add_time = SubmitField('Confirm')
