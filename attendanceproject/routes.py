@@ -265,14 +265,17 @@ def settime():
     if request.method == "POST" and form.validate_on_submit():
         for i in form:
             if type(i.data) == datetime.time:
+                # TODO: Turn this \/ into custom validator
                 if i.data <= datetime.time(hour=13, minute=40) and i.data >= datetime.time(hour=8, minute=15):
-                    print('within range')
+                    dtime = datetime.datetime.combine(datetime.date(2000, 1, 1), i.data)
+                    end_time = dtime + datetime.timedelta(hours=1)
+                    time = Times(start_time=i.data, end_time=end_time.time())
+                    db.session.add(time)
                 else:
-                    print('not within range')
-                dtime = datetime.datetime.combine(datetime.date(2000, 1, 1), i.data)
-                end_time = dtime + datetime.timedelta(hours=1)
-                time = Times(start_time=i.data, end_time=end_time.time())
-                db.session.add(time)
+                    db.session.rollback()
+                    flash('')
+                    break
+
                 db.session.commit()
         flash('Times added')
     return render_template('settime.html', form=form)
