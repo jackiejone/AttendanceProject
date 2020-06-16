@@ -1,15 +1,30 @@
 {% extends "layout.html" %}
 {% block content %}
-        <h1>Setttimes</h1>
-        
-        <!-- Form for setting the default times which each class can be -->
-        <form action='' method='POST'>
-            {{ form.csrf_token }}
-            {{ form.time1.label }} {{ form.time1 }} {{ form.time1.errors }}<br>
-            {{ form.time2.label }} {{ form.time2 }} {{ form.time2.errors }}<br>
-            {{ form.time3.label }} {{ form.time3 }} {{ form.time3.errors }}<br>
-            {{ form.time4.label }} {{ form.time4 }} {{ form.time4.errors }}<br>
-            {{ form.time5.label }} {{ form.time5 }} {{ form.time5.errors }}<br>
-            {{ form.add_time }}
-        </form>
+
+    <!-- TODO: CSS FOR THIS PAGE -->
+    <h1>Setttimes</h1>
+    
+    {% macro render_time_field(field) %}
+        <div id='time_field'>
+                {% if field.errors %}
+                    <ul class='time_errors'>
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {{ field.label }} {{ field(**kwargs)|safe }}
+        </div>
+    {% endmacro %}
+
+    <!-- Form for setting the default times which each class can be -->
+    <form action='' method='POST'>
+        {{ form.csrf_token }}
+        {{ render_time_field(form.time1) }}
+        {{ render_time_field(form.time2) }}
+        {{ render_time_field(form.time3) }}
+        {{ render_time_field(form.time4) }}
+        {{ render_time_field(form.time5) }}
+        {{ form.add_time }}
+    </form>
 {% endblock %}

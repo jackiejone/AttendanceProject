@@ -262,7 +262,9 @@ def settime():
         return redirect(url_for('home'))
     
     form = AddTimesForm()
+    # TODO: change database to use 'periods' of each class and assign each period times
     if request.method == "POST" and form.validate_on_submit():
+        dupe_check = False
         for i in form:
             if type(i.data) == datetime.time:
                 dtime = datetime.datetime.combine(datetime.date(2000, 1, 1), i.data)
@@ -271,7 +273,12 @@ def settime():
                 try:
                     db.session.add(time)
                     db.session.flush()
-                db.session.rollback()
+                except IntegrityError:
+                    db.session.rollback()
+                    if not dupe_check:
+                        flash('One or more times have already been been added to the database, not all times we\'re updated')
+                        dupe_check = True
+                    break
                 db.session.commit()
         flash('Times added')
     return render_template('settime.html', form=form)

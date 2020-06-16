@@ -96,6 +96,7 @@ def check_time(form, field):
     if field.data > datetime.time(hour=13, minute=40) or field.data < datetime.time(hour=8, minute=15):
         raise ValidationError(message="Minium Time is 8.15am and Maxium Time is 1.40pm")
 
+
 class AddTimesForm(FlaskForm):
     time1 = TimeField(label='Period 1', format='%H:%M', validators=[check_time, InputRequired()])
     time2 = TimeField(label='Period 2', format='%H:%M', validators=[check_time, InputRequired()])
