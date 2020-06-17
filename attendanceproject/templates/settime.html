@@ -20,11 +20,7 @@
     <!-- Form for setting the default times which each class can be -->
     <form action='' method='POST'>
         {{ form.csrf_token }}
-        {{ render_time_field(form.time1) }}
-        {{ render_time_field(form.time2) }}
-        {{ render_time_field(form.time3) }}
-        {{ render_time_field(form.time4) }}
-        {{ render_time_field(form.time5) }}
+        {{ render_time_field(form.time) }}
         {{ form.add_time }}
     </form>
 {% endblock %}

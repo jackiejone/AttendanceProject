@@ -264,23 +264,18 @@ def settime():
     form = AddTimesForm()
     # TODO: change database to use 'periods' of each class and assign each period times
     if request.method == "POST" and form.validate_on_submit():
-        dupe_check = False
-        for i in form:
-            if type(i.data) == datetime.time:
-                dtime = datetime.datetime.combine(datetime.date(2000, 1, 1), i.data)
-                end_time = dtime + datetime.timedelta(hours=1)
-                time = Times(start_time=i.data, end_time=end_time.time())
-                try:
-                    db.session.add(time)
-                    db.session.flush()
-                except IntegrityError:
-                    db.session.rollback()
-                    if not dupe_check:
-                        flash('One or more times have already been been added to the database, not all times we\'re updated')
-                        dupe_check = True
-                    break
-                db.session.commit()
-        flash('Times added')
+        dtime = datetime.datetime.combine(datetime.date(2000, 1, 1), form.time.data)
+        end_time = dtime + datetime.timedelta(hours=1)
+        time = Times(start_time=form.time.data, end_time=end_time.time())
+        try:
+            db.session.add(time)
+            db.session.flush()
+        except IntegrityError:
+            db.session.rollback()
+            flash('One or more times have already been been added to the database, not all times we\'re updated')
+        else:
+            db.session.commit()
+            flash('Time Successfully Added')
     return render_template('settime.html', form=form)
 
 # Route for handling error 404

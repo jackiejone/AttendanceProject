@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import (StringField, SelectField, IntegerField, PasswordField,
                      BooleanField, SubmitField, SelectMultipleField, FieldList, FormField)
 from wtforms.widgets import CheckboxInput, ListWidget
-from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError, AnyOf
+from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError, AnyOf, StopValidation
 from wtforms.fields.html5 import TimeField
 from attendanceproject.models import *
 from flask_login import current_user
@@ -93,14 +93,12 @@ class CodeJoinForm(FlaskForm):
     join = SubmitField('Join Class')
 
 def check_time(form, field):
-    if field.data > datetime.time(hour=13, minute=40) or field.data < datetime.time(hour=8, minute=15):
-        raise ValidationError(message="Minium Time is 8.15am and Maxium Time is 1.40pm")
+        if field.data > datetime.time(hour=13, minute=40) or field.data < datetime.time(hour=8, minute=15):
+            raise ValidationError(message="Minium Time is 8.15am and Maxium Time is 1.40pm")
+        if Times.query.filter_by(start_time=field.data).first():
+            raise ValidationError(message="Time Already Taken")
 
 
 class AddTimesForm(FlaskForm):
-    time1 = TimeField(label='Period 1', format='%H:%M', validators=[check_time, InputRequired()])
-    time2 = TimeField(label='Period 2', format='%H:%M', validators=[check_time, InputRequired()])
-    time3 = TimeField(label='Period 3', format='%H:%M', validators=[check_time, InputRequired()])
-    time4 = TimeField(label='Period 4', format='%H:%M', validators=[check_time, InputRequired()])
-    time5 = TimeField(label='Period 5', format='%H:%M', validators=[check_time, InputRequired()])
+    time = TimeField(label='Add a Time', format='%H:%M', validators=[check_time, InputRequired()])
     add_time = SubmitField('Confirm')
