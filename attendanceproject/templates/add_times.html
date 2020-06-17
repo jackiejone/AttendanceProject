@@ -2,7 +2,7 @@
 {% block content %}
 
     <!-- TODO: CSS FOR THIS PAGE -->
-    <h1>Setttimes</h1>
+    <h1>Add Times</h1>
     
     {% macro render_time_field(field) %}
         <div id='time_field'>
@@ -23,4 +23,12 @@
         {{ render_time_field(form.time) }}
         {{ form.add_time }}
     </form>
+
+    <ul>
+        {% for time in times %}
+            {% if time %}
+                <li>{{ time.start_time }} - {{ time.end_time }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
 {% endblock %}

@@ -59,7 +59,8 @@ class SubjectTimes(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False)
     stime_id = db.Column(db.Integer, db.ForeignKey('times.id'), nullable=False)
-    sweek = db.Column(db.Integer, nullable=False)
+    sweek = db.Column(db.Boolean, nullable=False)
+    sday = db.Column(db.Integer, nullable=False)
     time = db.relationship('Times', back_populates='subjects')
     subject = db.relationship('SubjectCode', back_populates='times')
 

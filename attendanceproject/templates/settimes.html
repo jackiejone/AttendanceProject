@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <!-- TODO: CSS FOR THIS PAGE -->
+    <h1>Set Times</h1>
+    
+    {% macro render_time_field(field) %}
+        <div id='time_field'>
+                {% if field.errors %}
+                    <ul class='time_errors'>
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {{ field.label }} {{ field(**kwargs)|safe }}
+        </div>
+    {% endmacro %}
+
+    <!-- Form for setting the default times which each class can be -->
+    <form action='' method='POST'>
+        {{ form.csrf_token }}
+        {{ render_time_field(form.time) }}
+        {{ render_time_field(form.week) }}
+        {{ render_time_field(form.day) }}
+        {{ form.add }}
+    </form>
+
+{% endblock %}

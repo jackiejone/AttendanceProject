@@ -255,14 +255,21 @@ def account(user):
 def logtime(user_code):
     return None
 
-@app.route('/settimes', methods=['GET', 'POST'])
+
+# Function for returning the start time, used for sorting times
+def get_start_time(time):
+    return time.start_time
+
+
+# TODO: Form for removing times (Conflict when removing times which are FK for subjects)
+@app.route('/add_times', methods=['GET', 'POST'])
 @login_required
-def settime():
+def addtime():
     if current_user.auth != 'teacher':
+        flash('You do not have permission to access this page')
         return redirect(url_for('home'))
     
     form = AddTimesForm()
-    # TODO: change database to use 'periods' of each class and assign each period times
     if request.method == "POST" and form.validate_on_submit():
         dtime = datetime.datetime.combine(datetime.date(2000, 1, 1), form.time.data)
         end_time = dtime + datetime.timedelta(hours=1)
@@ -272,11 +279,18 @@ def settime():
             db.session.flush()
         except IntegrityError:
             db.session.rollback()
-            flash('One or more times have already been been added to the database, not all times we\'re updated')
+            flash('The time entered in has already been added to the database')
         else:
             db.session.commit()
             flash('Time Successfully Added')
-    return render_template('settime.html', form=form)
+    times = sorted(Times.query.all(), key=get_start_time)
+    return render_template('add_times.html', form=form, times=times)
+
+@app.route('/classes/<class_code>/settimes')
+@login_required
+def settimes(class_code):
+    form = SetTimesForm()
+    return render_template('settimes.html', form=form)
 
 # Route for handling error 404
 @app.errorhandler(404)

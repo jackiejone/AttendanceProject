@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SelectField, IntegerField, PasswordField,
-                     BooleanField, SubmitField, SelectMultipleField, FieldList, FormField)
+                     BooleanField, SubmitField, SelectMultipleField, FieldList,
+                     FormField, RadioField)
 from wtforms.widgets import CheckboxInput, ListWidget
 from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError, AnyOf, StopValidation
 from wtforms.fields.html5 import TimeField
@@ -92,13 +93,30 @@ class CodeJoinForm(FlaskForm):
                                            class_check, class_num_check], render_kw={'placeholder': '6 Letters'})
     join = SubmitField('Join Class')
 
+
+# Validator for checking if the times in the form are within range or already in the database
 def check_time(form, field):
         if field.data > datetime.time(hour=13, minute=40) or field.data < datetime.time(hour=8, minute=15):
             raise ValidationError(message="Minium Time is 8.15am and Maxium Time is 1.40pm")
         if Times.query.filter_by(start_time=field.data).first():
             raise ValidationError(message="Time Already Taken")
 
-
+# Form for adding times to the database
 class AddTimesForm(FlaskForm):
     time = TimeField(label='Add a Time', format='%H:%M', validators=[check_time, InputRequired()])
     add_time = SubmitField('Confirm')
+
+def get_start_time(time):
+    return time.start_time
+
+def get_times():
+    times = sorted(Times.query.all(), key=get_start_time)
+    return [(time.id, time.start_time) for time in times]
+
+# Form for associating a time with a class
+class SetTimesForm(FlaskForm):
+    time = SelectField('Start Time', validators=None, choices=get_times())
+    week = RadioField('Week', choices=[(0, 'A'), (1, 'B')])
+    day = SelectField('Day', choices=[(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'),
+                                      (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')])
+    add = SubmitField('Add Time')
