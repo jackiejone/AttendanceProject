@@ -57,7 +57,7 @@ class SubjectTimes(db.Model):
     __tablename__ = "subject_time"
     
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    subject_id = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subject_code.id'))
     stime_id = db.Column(db.Integer, db.ForeignKey('times.id'), nullable=False)
     sweek = db.Column(db.Boolean, nullable=False)
     sday = db.Column(db.Integer, nullable=False)

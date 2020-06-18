@@ -115,8 +115,8 @@ def get_times():
 
 # Form for associating a time with a class
 class SetTimesForm(FlaskForm):
-    time = SelectField('Start Time', validators=None, choices=get_times())
-    week = RadioField('Week', choices=[(0, 'A'), (1, 'B')])
+    time = SelectField('Start Time', validators=None, choices=get_times(), coerce=int)
+    week = RadioField('Week', choices=[(0, 'A'), (1, 'B')], coerce=int)
     day = SelectField('Day', choices=[(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'),
-                                      (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')])
+                                      (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')], coerce=int)
     add = SubmitField('Add Time')

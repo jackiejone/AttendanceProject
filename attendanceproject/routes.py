@@ -229,7 +229,7 @@ def create_class():
                     asso = UserSubject(user_type='teacher')
                     asso.subject = new_class
                     user.subjects.append(asso)
-                    db.session.rollback()
+                    db.session.rollback() # TODO: what is this <----
 
     return render_template('create_class.html', form=form)
 
@@ -286,10 +286,16 @@ def addtime():
     times = sorted(Times.query.all(), key=get_start_time)
     return render_template('add_times.html', form=form, times=times)
 
-@app.route('/classes/<class_code>/settimes')
+@app.route('/classes/<class_code>/settimes', methods=["GET", "POST"])
 @login_required
 def settimes(class_code):
     form = SetTimesForm()
+    if request.method == 'POST' and form.validate_on_submit():
+        subject = SubjectCode.query.filter_by(code=class_code).first() #Parent
+        asso = SubjectTimes(sweek=form.week.data, sday=form.day.data)
+        asso.time = Times.query.filter_by(id=form.time.data).first()
+        subject.times.append(asso)
+        db.session.commit()
     return render_template('settimes.html', form=form)
 
 # Route for handling error 404
