@@ -24,10 +24,18 @@
         {{ form.add_time }}
     </form>
 
+    {% if times %}
+        <p class='warning'>Warning! Deleting a time also deletes it from all the classes that use the deleted time</p>
+    {% endif %}
     <ul>
         {% for time in times %}
             {% if time %}
-                <li>{{ time.start_time }} - {{ time.end_time }}</li>
+                <li>{{ time.start_time }} - {{ time.end_time }}
+                    <form action='/delete_times' method='POST'>
+                        <input type="hidden" name='time' value='{{ time.id }}'>
+                        <input type="submit" name='Submit' value='Delete'>
+                    </form>
+                </li>
             {% endif %}
         {% endfor %}
     </ul>

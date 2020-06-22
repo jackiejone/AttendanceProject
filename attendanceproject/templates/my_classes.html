@@ -3,6 +3,10 @@
     <h1>my classes</h1>
     <h2>{{ user.fname }} {{ user.lname }} {{ user.student_code }}</h2>
 
+    {% for class in current_user.subjects %}
+        <a href='{{ url_for("class_code", class_code=class.subject.code) }}'>{{ class.subject.name }}</a>
+    {% endfor %}
+
     {% if user.auth == 'student' %}
         {% if form.code %}
         <form method='POST' action=''>

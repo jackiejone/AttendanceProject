@@ -82,4 +82,3 @@ class Times(db.Model):
     start_time = db.Column(db.Time, unique=True, nullable=False)
     end_time = db.Column(db.Time, unique=True, nullable=False)
     subjects = db.relationship("SubjectTimes", back_populates='time')
-

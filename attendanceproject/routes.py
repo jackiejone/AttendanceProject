@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from string import ascii_letters, digits
 from random import choice
 import datetime
+import time as ts
 
 # Home Route
 @app.route('/', methods=["GET"])
@@ -261,7 +262,6 @@ def get_start_time(time):
     return time.start_time
 
 
-# TODO: Form for removing times (Conflict when removing times which are FK for subjects)
 @app.route('/add_times', methods=['GET', 'POST'])
 @login_required
 def addtime():
@@ -286,19 +286,67 @@ def addtime():
     times = sorted(Times.query.all(), key=get_start_time)
     return render_template('add_times.html', form=form, times=times)
 
+
+@app.route('/delete_times', methods=['POST'])
+@login_required
+def removetime():
+    if current_user.auth != 'teacher':
+        flash('You do not have permission to access this page')
+        return redirect(url_for('addtime'))
+
+    # Getting the id of the class to query the database for
+    try:
+        time_id = int(request.form.get('time'))
+    except ValueError:
+        flash('Invalid value for time deletion')
+    else:
+        time = Times.query.filter_by(id=time_id).first()
+        if time:
+            # Deleting the entries with the time set as a FK
+            for i in time.subjects:
+                db.session.delete(i)
+            # Deleting the time itself
+            db.session.delete(time)
+            db.session.commit()
+            flash('Successfully deleted time')
+        else:
+            flash('Invalid time')
+    return redirect(url_for('addtime'))
+
+    
+
 @app.route('/classes/<class_code>/settimes', methods=["GET", "POST"])
 @login_required
 def settimes(class_code):
+    if current_user.auth != 'teacher':
+        flash('You do not have permission to access this page')
+        return redirect(url_for('home'))
+
     form = SetTimesForm()
     if request.method == 'POST' and form.validate_on_submit():
-        subject = SubjectCode.query.filter_by(code=class_code).first() #Parent
-        asso = SubjectTimes(sweek=form.week.data, sday=form.day.data)
-        asso.time = Times.query.filter_by(id=form.time.data).first()
-        subject.times.append(asso)
-        db.session.commit()
+        subject = SubjectCode.query.filter_by(code=class_code).first()
+        if SubjectTimes.query.filter_by(subject_id=subject.id,
+                                        stime_id=form.time.data,
+                                        sweek=form.week.data,
+                                        sday=form.day.data).first():
+            flash('This time is already assocaited with the class')
+            print(len(subject.times))
+        elif len(subject.times) >= 10:
+            flash('Maxmium amount of times of 10 for this classes reached.')
+        else:
+            asso = SubjectTimes(sweek=form.week.data, sday=form.day.data)
+            asso.time = Times.query.filter_by(id=form.time.data).first()
+            subject.times.append(asso)
+            db.session.commit()
+            flash('Successfully set time')
     return render_template('settimes.html', form=form)
 
 # Route for handling error 404
 @app.errorhandler(404)
 def error404(e):
     return render_template('error404.html')
+
+@app.errorhandler(405)
+def error405(e):
+    flash('Invalid Request Method')
+    return redirect(url_for('home'))
