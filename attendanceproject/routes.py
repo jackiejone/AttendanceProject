@@ -10,7 +10,6 @@ from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from string import ascii_letters, digits
 from random import choice
 import datetime
-import time as ts
 
 # Home Route
 @app.route('/', methods=["GET"])
@@ -105,9 +104,17 @@ def classes(user_code):
         # Display and validation of form if the user is a teacher
         # Dynamically creating booleanfields for each class
         classes = SubjectCode.query.all()
-        sclasses = [(x.id, x.name) for x in classes]
+        print([y.id for y in user.subjects])
+        sclasses = [(x.id, x.name) for x in classes if x.id not in [y.id for y in user.subjects]]
         form = JoinClassForm()
-        form.classes.choices = sclasses
+        print(sclasses)
+        print(type(sclasses))
+        if sclasses:
+            form.classes.choices = sclasses
+        print('-' * 50)
+        print(form.classes)
+        print(type(form.classes))
+        # TODO: BROKEN - form.classes doesnt exist but does????
         # Handling form post reqeust for adding a user to multiple classes
         if request.method == 'POST' and form.validate_on_submit():
             formdata = form.classes.data
@@ -330,7 +337,6 @@ def settimes(class_code):
                                         sweek=form.week.data,
                                         sday=form.day.data).first():
             flash('This time is already assocaited with the class')
-            print(len(subject.times))
         elif len(subject.times) >= 10:
             flash('Maxmium amount of times of 10 for this classes reached.')
         else:

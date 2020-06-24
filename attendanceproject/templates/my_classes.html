@@ -3,9 +3,11 @@
     <h1>my classes</h1>
     <h2>{{ user.fname }} {{ user.lname }} {{ user.student_code }}</h2>
 
-    {% for class in current_user.subjects %}
-        <a href='{{ url_for("class_code", class_code=class.subject.code) }}'>{{ class.subject.name }}</a>
-    {% endfor %}
+    {% if user_classes %}
+        {% for class in user_classes %}
+            <a href="{{ url_for('class_code', class_code=class.code) }}"><p>{{ class.name }}</p></a>
+        {% endfor %}
+    {% endif %}
 
     {% if user.auth == 'student' %}
         {% if form.code %}
@@ -19,8 +21,9 @@
         </form>
         {% endif %}
     {% endif %}
-
-    {% if current_user.auth == 'teacher' %}
+    
+    <!-- TODO: BROKEN: 'if form.classes' doesnt work -->
+    {% if current_user.auth == 'teacher'%}
         <!-- Adding A student to multiple classes -->
         {% if form.errors %}
             <ul class='errors'>
@@ -31,17 +34,11 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        <form method='POST' action="">
-            {{ form.hidden_tag() }}
-            {{ form.classes }}
-            {{ form.submit }}
-        </form>
+            <form method='POST' action="">
+                {{ form.hidden_tag() }}
+                {{ form.classes }}
+                {{ form.submit }}
+            </form>
         <!-- End of adding a student to multiple classes -->
-    {% endif %}
-
-    {% if user_classes %}
-        {% for class in user_classes %}
-            <a href="{{ url_for('class_code', class_code=class.code) }}"><p>{{ class.name }}</p></a>
-        {% endfor %}
     {% endif %}
 {% endblock %}
