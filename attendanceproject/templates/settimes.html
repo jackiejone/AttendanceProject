@@ -26,4 +26,13 @@
         {{ form.add }}
     </form>
 
+    <ul>
+        {% for time in times %}
+            <li>{{ time.time.start_time }} - {{time.time.end_time}}
+                
+                {% if time.sweek == 0%} Week A {% else %} Week B {% endif %} {{ days[time.sday] }}
+
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}

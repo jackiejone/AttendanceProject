@@ -244,15 +244,31 @@ def create_class():
     return render_template('create_class.html', form=form)
 
 # Individual class route
-@app.route('/classes/<class_code>')
+@app.route('/account/<user_code>/classes/<class_code>')
 @login_required
-def class_code(class_code):
-    if (current_user.auth == 'teacher'
-        and class_code in
-        [x.subject.code for x in current_user.subjects]):
-        print('yes')
-    else:
-        print('no')
+def class_code(class_code, user_code):
+    subject = SubjectCode.query.filter_by(code=class_code).first()
+    if not subject:
+        flash('Class could not be found')
+        return redirect(url_for('classes', user_code=current_user.user_code))
+    user = User.query.filter_by(user_code=user_code).first()
+    if user: # TODO: Check if the user is the student, a teacher and if the user is the current user or not
+        # User is a teacher and they're viewing their class/es
+        if (current_user.auth == 'teacher' and class_code in
+            [x.subject.code for x in current_user.subjects]):
+            c_code = class_code
+            return render_template("class.html", class_code=c_code)
+        # User is a teacher but they're not viewing one of their classes
+        elif current_user.auth == 'teacher':
+            pass
+        # User is a student and they're viewing their class
+        elif (current_user.auth == 'student' and class_code in
+            [x.subject.code for x in current_user.subjects]):
+            pass
+        # User is a student but they're not viewing one of their classes
+        else:
+            flash('You do not have access to this page')
+            return redirect(url_for('classes', user_code=current_user.user_code))
     return render_template("class.html")
 
 # Account Route
@@ -365,7 +381,9 @@ def settimes(class_code):
     else:
         flash('Class was not found')
         return redirect(url_for('classes', user_code=current_user.user_code))
-    return render_template('settimes.html', form=form)
+    times = subject.times
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    return render_template('settimes.html', form=form, times=times, days=days)
 
 # Route for handling error 404
 @app.errorhandler(404)

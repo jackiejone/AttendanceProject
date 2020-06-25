@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>my classes</h1>
-    <h2>{{ user.fname }} {{ user.lname }} {{ user.student_code }}</h2>
+    <h1>Classes for</h1>
+    <h2>{{ user.fname }} {{ user.lname }} {{ user.user_code }}</h2>
 
     {% if user_classes %}
         {% for class in user_classes %}
-            <a href="{{ url_for('class_code', class_code=class.code) }}"><p>{{ class.name }}</p></a>
+            <a href="{{ url_for('class_code', class_code=class.code, user_code=user.user_code) }}"><p>{{ class.name }}</p></a>
         {% endfor %}
     {% endif %}
 
