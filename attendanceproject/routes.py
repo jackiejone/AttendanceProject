@@ -270,18 +270,24 @@ def logtime(user_code):
 def get_start_time(time):
     return time.start_time
 
-
+# Route for setting default times which a subject/class can be on at
 @app.route('/add_times', methods=['GET', 'POST'])
 @login_required
 def addtime():
+    # Checking if the user is a teacher or not
     if current_user.auth != 'teacher':
         flash('You do not have permission to access this page')
         return redirect(url_for('home'))
     
     form = AddTimesForm()
     if request.method == "POST" and form.validate_on_submit():
+        # Turning the time taken from the form into a datetime in order to 
+        # add one hour to it to get the ending time of the class
         dtime = datetime.datetime.combine(datetime.date(2000, 1, 1), form.time.data)
+        # defining the end time of the class by adding one hour to the starting time
         end_time = dtime + datetime.timedelta(hours=1)
+
+        # Adding the starting and ending times to the database
         time = Times(start_time=form.time.data, end_time=end_time.time())
         try:
             db.session.add(time)
@@ -292,10 +298,11 @@ def addtime():
         else:
             db.session.commit()
             flash('Time Successfully Added')
+    # Getting all the times and presenting them in a chronological order
     times = sorted(Times.query.all(), key=get_start_time)
     return render_template('add_times.html', form=form, times=times)
 
-
+# Route for deleting the possible times which a subject/class can be on at
 @app.route('/delete_times', methods=['POST'])
 @login_required
 def removetime():
@@ -304,6 +311,8 @@ def removetime():
         return redirect(url_for('addtime'))
 
     # Getting the id of the class to query the database for
+    # and checking if the time which the user wants to delete is a
+    # valid time
     try:
         time_id = int(request.form.get('time'))
     except ValueError:
@@ -323,7 +332,8 @@ def removetime():
     return redirect(url_for('addtime'))
 
     
-
+# Route for setting the time of a specific class/subject for each
+# week and day
 @app.route('/classes/<class_code>/settimes', methods=["GET", "POST"])
 @login_required
 def settimes(class_code):
@@ -331,22 +341,30 @@ def settimes(class_code):
         flash('You do not have permission to access this page')
         return redirect(url_for('home'))
 
-    form = SetTimesForm()
-    if request.method == 'POST' and form.validate_on_submit():
-        subject = SubjectCode.query.filter_by(code=class_code).first()
-        if SubjectTimes.query.filter_by(subject_id=subject.id,
-                                        stime_id=form.time.data,
-                                        sweek=form.week.data,
-                                        sday=form.day.data).first():
-            flash('This time is already assocaited with the class')
-        elif len(subject.times) >= 10:
-            flash('Maxmium amount of times of 10 for this classes reached.')
-        else:
-            asso = SubjectTimes(sweek=form.week.data, sday=form.day.data)
-            asso.time = Times.query.filter_by(id=form.time.data).first()
-            subject.times.append(asso)
-            db.session.commit()
-            flash('Successfully set time')
+    # Checking if the class exists
+    subject = SubjectCode.query.filter_by(code=class_code).first()
+    if subject:
+        form = SetTimesForm()
+        if request.method == 'POST' and form.validate_on_submit():
+            # Checking if the class already has a combination of day, time, and week
+            if SubjectTimes.query.filter_by(subject_id=subject.id,
+                                            stime_id=form.time.data,
+                                            sweek=form.week.data,
+                                            sday=form.day.data).first():
+                flash('This time is already assocaited with the class')
+            # Checking if the subject has the maxmium amount of times
+            elif len(subject.times) >= 10:
+                flash('Maxmium amount of times of 10 for this classes reached.')
+            # Setting the time for the class which the user entered into the form
+            else:
+                asso = SubjectTimes(sweek=form.week.data, sday=form.day.data)
+                asso.time = Times.query.filter_by(id=form.time.data).first()
+                subject.times.append(asso)
+                db.session.commit()
+                flash('Successfully set time')
+    else:
+        flash('Class was not found')
+        return redirect(url_for('classes', user_code=current_user.user_code))
     return render_template('settimes.html', form=form)
 
 # Route for handling error 404
