@@ -90,7 +90,7 @@ def class_check(form, field):
 class CodeJoinForm(FlaskForm):
     code = StringField('Code', validators=[InputRequired(),
                                            Length(min=6, max=6, message='Field must be 6 characters long'),
-                                           class_check, class_num_check], render_kw={'placeholder': '6 Letters'})
+                                           class_check, class_num_check], render_kw={'placeholder': '6 Characters'})
     join = SubmitField('Join Class')
 
 

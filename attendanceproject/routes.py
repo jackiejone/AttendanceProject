@@ -88,6 +88,17 @@ def logout():
 def subject_name(user):
     return [x.subject for x in user.subjects]
 
+def populate_JoinClassForm(user):
+    # Dynamically creating booleanfields for each class
+    classes = SubjectCode.query.all()
+    # Excluding classes for which the user is already in
+    sclasses = [(x.id, x.name) for x in classes if x.id not in [y.subject_id for y in user.subjects]]
+    form = JoinClassForm()
+    if sclasses:
+        form.classes.choices = sclasses
+    return form
+
+
 # Classes Route TODO: Split up this route
 @app.route('/account/<user_code>/classes', methods=['GET', 'POST'])
 @login_required
@@ -101,22 +112,12 @@ def classes(user_code):
             return redirect(url_for('classes', user_code=current_user.user_code))
         else:
             user_classes = subject_name(user) # Getting a list of the user's subjects
-        # Display and validation of form if the user is a teacher
-        # Dynamically creating booleanfields for each class
-        classes = SubjectCode.query.all()
-        print([y.id for y in user.subjects])
-        sclasses = [(x.id, x.name) for x in classes if x.id not in [y.id for y in user.subjects]]
-        form = JoinClassForm()
-        print(sclasses)
-        print(type(sclasses))
-        if sclasses:
-            form.classes.choices = sclasses
-        print('-' * 50)
-        print(form.classes)
-        print(type(form.classes))
-        # TODO: BROKEN - form.classes doesnt exist but does????
+        # Display and validation of form for adding a user to a class if the user is a teacher
+        form = populate_JoinClassForm(user)
+
         # Handling form post reqeust for adding a user to multiple classes
         if request.method == 'POST' and form.validate_on_submit():
+            user = User.query.filter_by(user_code=user_code).first()
             formdata = form.classes.data
             # Stopping user to join class if they already have 6 classes or amount
             # of choices exceede maxmium of 6 classes
@@ -144,10 +145,11 @@ def classes(user_code):
                             db.session.commit()
                             # Refresh user affter change in database
                             user = User.query.filter_by(user_code=user_code).first()
+                            form = populate_JoinClassForm(user)
         user_classes = subject_name(user) # Getting a list of the user's subjects/classes
         return render_template('my_classes.html', form=form, user=user, user_classes=user_classes)
 
-    else:
+    else: # If the current user is not a teacher 
         if user_code != current_user.user_code:
             flash("You cannot access this page")
             return redirect(url_for('classes', user_code=current_user.user_code))
@@ -237,7 +239,7 @@ def create_class():
                     asso = UserSubject(user_type='teacher')
                     asso.subject = new_class
                     user.subjects.append(asso)
-                    db.session.rollback() # TODO: what is this <----
+                    db.session.commit()
 
     return render_template('create_class.html', form=form)
 

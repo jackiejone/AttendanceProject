@@ -22,8 +22,9 @@
         {% endif %}
     {% endif %}
     
-    <!-- TODO: BROKEN: 'if form.classes' doesnt work -->
-    {% if current_user.auth == 'teacher'%}
+    <!-- Doesn't display the form if the current user is not a teacher, there are no choices left in the form 
+         and if the user which is being viewed already has the maxmium amount of possible classes -->
+    {% if current_user.auth == 'teacher' and form.classes.choices and None or user_classes|length < 6 %}
         <!-- Adding A student to multiple classes -->
         {% if form.errors %}
             <ul class='errors'>
