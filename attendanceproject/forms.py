@@ -108,14 +108,10 @@ class AddTimesForm(FlaskForm):
 
 def get_start_time(time):
     return time.start_time
-
-def get_times():
-    times = sorted(Times.query.all(), key=get_start_time)
-    return [(time.id, time.start_time) for time in times]
-
+    
 # Form for associating a time with a class
 class SetTimesForm(FlaskForm):
-    time = SelectField('Start Time', validators=None, choices=get_times(), coerce=int)
+    time = SelectField('Start Time', validators=None, coerce=int)
     week = RadioField('Week', choices=[(0, 'A'), (1, 'B')], coerce=int)
     day = SelectField('Day', choices=[(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'),
                                       (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')], coerce=int)

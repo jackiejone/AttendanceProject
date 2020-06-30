@@ -347,6 +347,10 @@ def removetime():
             flash('Invalid time')
     return redirect(url_for('addtime'))
 
+
+def get_times():
+    times = sorted(Times.query.all(), key=get_start_time)
+    return [(time.id, time.start_time) for time in times]
     
 # Route for setting the time of a specific class/subject for each
 # week and day
@@ -361,6 +365,7 @@ def settimes(class_code):
     subject = SubjectCode.query.filter_by(code=class_code).first()
     if subject:
         form = SetTimesForm()
+        form.time.choices = get_times()
         if request.method == 'POST' and form.validate_on_submit():
             # Checking if the class already has a combination of day, time, and week
             if SubjectTimes.query.filter_by(subject_id=subject.id,
