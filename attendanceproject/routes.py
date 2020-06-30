@@ -243,6 +243,12 @@ def create_class():
 
     return render_template('create_class.html', form=form)
 
+@app.route('/classes')
+@login_required
+def all_classes():
+    classes = SubjectCode.query.all()
+    return render_template('classes.html', classes=classes)
+
 # Individual class route
 @app.route('/account/<user_code>/classes/<class_code>')
 @login_required
@@ -257,14 +263,14 @@ def class_code(class_code, user_code):
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]):
             c_code = class_code
-            return render_template("class.html", class_code=c_code)
+            return render_template("class.html", subject=subject)
         # User is a teacher but they're not viewing one of their classes
         elif current_user.auth == 'teacher':
             pass
         # User is a student and they're viewing their class
         elif (current_user.auth == 'student' and class_code in
             [x.subject.code for x in current_user.subjects]):
-            pass
+            return subject.name
         # User is a student but they're not viewing one of their classes
         else:
             flash('You do not have access to this page')
