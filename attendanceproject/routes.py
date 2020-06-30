@@ -30,7 +30,7 @@ def register():
         email = form.email.data.strip().lower()
         user_code = form.std_code.data.strip().lower()
         # Generates hashed password using SHA256 encryption method
-        hashed_password = generate_password_hash(form.password.data, method='sha256')
+        hashed_password = generate_password_hash(form.password.data, method='sha256', salt_length=10)
         # Defines new user object to add to database
         user = User(fname=fname, lname=lname,
                     user_code=user_code, email=email,

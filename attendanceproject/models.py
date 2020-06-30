@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
     lname = db.Column(db.Text(20), nullable=False)
     user_code = db.Column(db.Text(8), nullable=False, unique=True)
     email = db.Column(db.Text(50), nullable=False, unique=True)
-    password = db.Column(db.Text(80), nullable=False)
+    password = db.Column(db.Text(90), nullable=False)
     auth = db.Column(db.Text(10), nullable=True)
     tags = db.relationship('Tag', backref='user_tag')
     subjects = db.relationship('UserSubject', back_populates='user')
