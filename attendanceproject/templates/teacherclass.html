@@ -1,11 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>{{ subject.name }}</h1>
+    <h1>{{ subject.name }} {{ user.fname }} {{ user.lname }}</h1>
 
-    <dl>
-        <dt>Join Code</dt>
-        <dd>{{ subject.join_code }}</dd>
-    </dl>
     <!-- Displaying all the users in the class if the user viewing the class is a teacher -->
     <h2>Times</h2>
     {% if subject.times %}

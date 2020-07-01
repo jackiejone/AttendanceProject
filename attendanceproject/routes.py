@@ -243,13 +243,36 @@ def create_class():
 
     return render_template('create_class.html', form=form)
 
+# Route for viewing all classes/subjects
 @app.route('/classes')
 @login_required
 def all_classes():
+    # Checking if the user is a teacher
+    if current_user.auth != "teacher":
+        flash('You do not have access to this page')
+        return redirect(url_for('home'))
+    # Getting all the classes/subjects form the database
     classes = SubjectCode.query.all()
     return render_template('classes.html', classes=classes)
 
-# Individual class route
+# Route for viewing a specific subject but not as a particular user
+@app.route('/classes/<subject>')
+@login_required
+def view_subject(subject):
+    # Checking if the user is a teacher
+    if current_user.auth != "teacher":
+        flash('You do not have access to this page')
+        return redirect(url_for('home'))
+    # getting the class/subject from the database
+    sub = SubjectCode.query.filter_by(code=subject).first()
+    if sub:
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+        return render_template('class.html', subject=sub, days=days)
+    else:
+        flash('Class could not be found')
+        return redirect(url_for('all_classes'))
+
+# Route for viewing a subject/class for a specific user as a specfic user
 @app.route('/account/<user_code>/classes/<class_code>')
 @login_required
 def class_code(class_code, user_code):
@@ -260,22 +283,23 @@ def class_code(class_code, user_code):
     user = User.query.filter_by(user_code=user_code).first()
     if user: # TODO: Check if the user is the student, a teacher and if the user is the current user or not
         # User is a teacher and they're viewing their class/es
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]):
             c_code = class_code
-            return render_template("class.html", subject=subject)
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=days)
         # User is a teacher but they're not viewing one of their classes
         elif current_user.auth == 'teacher':
-            pass
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=days)
         # User is a student and they're viewing their class
         elif (current_user.auth == 'student' and class_code in
             [x.subject.code for x in current_user.subjects]):
-            return subject.name
+            return render_template("studentclass.html", subject=subject, days=days)
         # User is a student but they're not viewing one of their classes
         else:
             flash('You do not have access to this page')
             return redirect(url_for('classes', user_code=current_user.user_code))
-    return render_template("class.html")
+    return render_template("teacherclass.html", subject=subject)
 
 # Account Route
 @app.route('/account/<user>')
@@ -283,10 +307,10 @@ def class_code(class_code, user_code):
 def account(user):
     return render_template("account.html")
 
+# Route for logging attendance
 @app.route('/logtime/<user_code>')
 def logtime(user_code):
     return None
-
 
 # Function for returning the start time, used for sorting times
 def get_start_time(time):
@@ -393,7 +417,7 @@ def settimes(class_code):
         flash('Class was not found')
         return redirect(url_for('classes', user_code=current_user.user_code))
     times = subject.times
-    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     return render_template('settimes.html', form=form, times=times, days=days)
 
 # Route for handling error 404
@@ -401,6 +425,7 @@ def settimes(class_code):
 def error404(e):
     return render_template('error404.html')
 
+# Route for handing error 405; Invlaid request method
 @app.errorhandler(405)
 def error405(e):
     flash('Invalid Request Method')

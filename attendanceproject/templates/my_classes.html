@@ -7,6 +7,7 @@
         <a href="{{ url_for('all_classes') }}">All Classes</a>
     {% endif %}
 
+    <h2>My Classes</h2>
     {% if user_classes %}
         {% for class in user_classes %}
             <a href="{{ url_for('class_code', class_code=class.code, user_code=user.user_code) }}"><p>{{ class.name }}</p></a>
@@ -15,6 +16,7 @@
 
     {% if user.auth == 'student' %}
         {% if form.code %}
+        <h2>Join Classes</h2>
         <form method='POST' action=''>
             {{ form.hidden_tag() }}
             {% for error in form.code.errors %}
@@ -33,6 +35,7 @@
     <!-- Doesn't display the form if the current user is not a teacher, there are no choices left in the form 
          and if the user which is being viewed already has the maxmium amount of possible classes -->
     {% if current_user.auth == 'teacher' and form.classes.choices and user_classes|length < 6 %}
+        <h2>Add user to classes</h2>
         <!-- Adding A student to multiple classes -->
         {% if form.errors %}
             <ul class='errors'>
