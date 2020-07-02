@@ -276,18 +276,21 @@ def view_subject(subject):
 
 def std_attnd(student):
     for subject in student.subjects:
+        print(subject)
+        print(subject.subject.times)
         for attnd_time in subject.attnd_times:
-            for sub_time in subject.subject:
-                for time in sub_time.time:
-                    print(time.start_time)
-                    print(time.end_time)
-        print(attnd_time)
+            print(attnd_time) # curretly no entries in table
+        for time in subject.subject.times:
+            print(time.time.start_time)
+            print(time.time.end_time)
+            
     return None
 
 # Route for viewing a subject/class for a specific user as a specfic user
 @app.route('/account/<user_code>/classes/<class_code>')
 @login_required
 def class_code(class_code, user_code):
+    std_attnd(current_user)
     subject = SubjectCode.query.filter_by(code=class_code).first()
     if not subject:
         flash('Class could not be found')
