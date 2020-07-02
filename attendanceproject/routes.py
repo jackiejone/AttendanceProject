@@ -11,6 +11,8 @@ from string import ascii_letters, digits
 from random import choice
 import datetime
 
+CONSTANT_DAYS = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday') 
+
 # Home Route
 @app.route('/', methods=["GET"])
 @app.route('/home', methods=["GET"])
@@ -233,7 +235,7 @@ def create_class():
             # Associating the teacher with the class
             if form.auto_add.data:
                 if len(current_user.subjects) >= 6:
-                    flash("Maxmium number of classes reached. You we're not added to the class")
+                    flash("Maxmium number of classes reached. You were not added to the class")
                 else:
                     user = User.query.filter_by(id=current_user.id).first()
                     asso = UserSubject(user_type='teacher')
@@ -266,11 +268,21 @@ def view_subject(subject):
     # getting the class/subject from the database
     sub = SubjectCode.query.filter_by(code=subject).first()
     if sub:
-        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-        return render_template('class.html', subject=sub, days=days)
+        return render_template('class.html', subject=sub, days=CONSTANT_DAYS)
     else:
         flash('Class could not be found')
         return redirect(url_for('all_classes'))
+
+
+def std_attnd(student):
+    for subject in student.subjects:
+        for attnd_time in subject.attnd_times:
+            for sub_time in subject.subject:
+                for time in sub_time.time:
+                    print(time.start_time)
+                    print(time.end_time)
+        print(attnd_time)
+    return None
 
 # Route for viewing a subject/class for a specific user as a specfic user
 @app.route('/account/<user_code>/classes/<class_code>')
@@ -283,18 +295,20 @@ def class_code(class_code, user_code):
     user = User.query.filter_by(user_code=user_code).first()
     if user: # TODO: Check if the user is the student, a teacher and if the user is the current user or not
         # User is a teacher and they're viewing their class/es
-        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]):
             c_code = class_code
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=days)
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS)
+        
         # User is a teacher but they're not viewing one of their classes
         elif current_user.auth == 'teacher':
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=days)
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS)
+        
         # User is a student and they're viewing their class
         elif (current_user.auth == 'student' and class_code in
             [x.subject.code for x in current_user.subjects]):
-            return render_template("studentclass.html", subject=subject, days=days)
+            return render_template("studentclass.html", subject=subject, days=CONSTANT_DAYS)
+        
         # User is a student but they're not viewing one of their classes
         else:
             flash('You do not have access to this page')
@@ -417,8 +431,7 @@ def settimes(class_code):
         flash('Class was not found')
         return redirect(url_for('classes', user_code=current_user.user_code))
     times = subject.times
-    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-    return render_template('settimes.html', form=form, times=times, days=days)
+    return render_template('settimes.html', form=form, times=times, days=CONSTANT_DAYS)
 
 # Route for handling error 404
 @app.errorhandler(404)

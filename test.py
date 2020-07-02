@@ -1,7 +1,6 @@
-import datetime
+x = 20
 
-dtime = datetime.datetime.now()
-print(dtime.weekday())
+def p():
+    return x
 
-dtime = datetime.datetime(year=2020, month=6, day=16)
-print(dtime.weekday())
+print(p())

@@ -23,7 +23,5 @@
         </ul>
     {% endif %}
 
-    {% if class_code %}
-        <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
-    {% endif %}
+    <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
 {% endblock %}
