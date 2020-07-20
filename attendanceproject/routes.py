@@ -323,15 +323,35 @@ def class_code(class_code, user_code):
 def account(user):
     return render_template("account.html")
 
+@app.route('/test', methods=['GET', 'POST'])
+def test():
+    print(current_user.tags)
+    print([tag.tag_uid for tag in current_user.tags])
+    return 'test'
+
 # Route for logging attendance using a post reqeust from an external http client
 @app.route('/logtime', methods=['POST'])
 def logtime():
+
     try:
-        user_id = request.form['user']
-        iud = request.form.['uid']
+        user_code = request.form['user']
+        card_uid = request.form['card_uid']
+        subject_code = request.form['subject']
     except:
         print("Failed to obtain values")
     else:
+        user = User.query.filter_by(user_code=user_id).first()
+        current_datetime = datetime.now()
+
+        if not user:
+            return "User not found"
+        if card_uid not in [tag.tag_uid for tag in user.tags]:
+            return "Unidentified Card"
+        if subject_code not in [x.subject.code for x in user.subjects]:
+            return "You are not in this class"
+
+# TODO: remove association of attendance time to UserSubject and just associate it with the user.
+# LOG DATABASE CHANGES IN DOCUMENT
         if user_id and uid:
             if User.query.filter_by(user_code=user_id).first():
                 print('duplicate')
