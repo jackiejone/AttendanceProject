@@ -276,13 +276,13 @@ def view_subject(subject):
 # TODO: Implement way of adding times to the database
 def std_attnd(student):
     for subject in student.subjects:
-        print(f"Subject Object: {subject}")
-        for attnd_time in subject.attnd_times: # Times the user entered the class
-            print(f"Attendance Time: {attnd_time}") # Prints AttendanceTime objects (time which the student attends the class and their attendnace status)
-            for sub_time in subject.subject: # UserSubject object
-                for time in sub_time.time:
-                    print(time.start_time)
-                    print(time.end_time)
+        print(subject)
+        print(subject.subject.times)
+        for attnd_time in subject.attnd_times:
+            print(attnd_time) # curretly no entries in table
+        for time in subject.subject.times:
+            print(time.time.start_time)
+            print(time.time.end_time)
     return None
 
 # Route for viewing a subject/class for a specific user as a specfic user
@@ -323,10 +323,24 @@ def class_code(class_code, user_code):
 def account(user):
     return render_template("account.html")
 
-# Route for logging attendance
-@app.route('/logtime/<user_code>')
-def logtime(user_code):
-    return None
+# Route for logging attendance using a post reqeust from an external http client
+@app.route('/logtime', methods=['POST'])
+def logtime():
+    try:
+        user_id = request.form['user']
+        iud = request.form.['uid']
+    except:
+        print("Failed to obtain values")
+    else:
+        if user_id and uid:
+            if User.query.filter_by(user_code=user_id).first():
+                print('duplicate')
+            else:
+                new_user = User(user_code=user_id)
+                db.session.add(new_user)
+                db.session.commit()
+                print('successfully added')
+    return user_id, uid
 
 # Function for returning the start time, used for sorting times
 def get_start_time(time):
