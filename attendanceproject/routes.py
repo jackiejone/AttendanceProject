@@ -11,7 +11,25 @@ from string import ascii_letters, digits
 from random import choice
 import datetime
 
+
 CONSTANT_DAYS = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday') 
+
+# Script for figuring out if a day is on Week A or Week B ()
+weeks = {'A':[], 'B':[]}
+AB = 'A'
+week_num = 1
+for i in range(1, 356):
+    date = datetime.timedelta(days=i)
+    start_date = datetime.date(2019, 12, 31)
+    end_date = start_date + date
+    if end_date.isoweekday() in [1, 2, 3, 4, 5]:
+        weeks[AB].append((week_num, end_date))
+        if end_date.isoweekday() == 5 and AB == 'A':
+            AB = 'B'
+            week_num += 1
+        elif end_date.isoweekday() == 5 and AB == 'B':
+            AB = 'A'
+            week_num += 1
 
 # Home Route
 @app.route('/', methods=["GET"])
@@ -276,7 +294,11 @@ def view_subject(subject):
 # TODO: Implement way of adding times to the database
 def std_attnd(student, subject):
     # This function returns the attendance for a specific student for a specific class
-    times = []
+    user_times = []
+
+    for i in subject.times:
+        if i.sweek == 0:
+            for x in 
 
     for x in range(0, 365):
         date = datetime.datetime(year=2020, month=1, day=1, hour=1, minute=1, second=1)
