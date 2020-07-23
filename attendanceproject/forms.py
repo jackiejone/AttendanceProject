@@ -96,8 +96,8 @@ class CodeJoinForm(FlaskForm):
 
 # Validator for checking if the times in the form are within range or already in the database
 def check_time(form, field):
-        if field.data > datetime.time(hour=13, minute=40) or field.data < datetime.time(hour=8, minute=15):
-            raise ValidationError(message="Minium Time is 8.15am and Maxium Time is 1.40pm")
+        if field.data > datetime.time(hour=13, minute=50) or field.data < datetime.time(hour=8, minute=15):
+            raise ValidationError(message="Minium Time is 8.15am and Maxium Time is 1.50pm")
         if Times.query.filter_by(start_time=field.data).first():
             raise ValidationError(message="Time Already Taken")
 

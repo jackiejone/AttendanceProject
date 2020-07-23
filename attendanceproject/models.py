@@ -16,10 +16,20 @@ class User(UserMixin, db.Model):
     auth = db.Column(db.Text(10), nullable=True)
     tags = db.relationship('Tag', backref='user_tag')
     subjects = db.relationship('UserSubject', back_populates='user')
+    attnd_times = db.relationship('AttendanceTime', backref='subject_attnd_times')
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# Table for associating signin times with the user
+class AttendanceTime(db.Model):
+    __tablename__ = "attnd_time"
+    
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    time = db.Column(db.DateTime, nullable=False) # DateTime field
+    user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    attnd_status = db.Column(db.Text(10))
 
 # Table for storing RFID tags and associating them with a user (student) as one user could
 # have multiple tags. The tags also have UIDs which can be used for authentication 
@@ -39,18 +49,8 @@ class UserSubject(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # Foreign Key
     user_type = db.Column(db.Text(10), nullable=False) # Teacher or student relationship to class
     subject_id = db.Column(db.Integer, db.ForeignKey('subject_code.id')) # Foreign Key
-    attnd_times = db.relationship('AttendanceTime', backref='subject_attnd_times')
     user = db.relationship('User', back_populates='subjects')
     subject = db.relationship('SubjectCode', back_populates='users')
-
-# Table for associating signin times with the user's class which their signing into
-class AttendanceTime(db.Model):
-    __tablename__ = "attnd_time"
-    
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    time = db.Column(db.DateTime, nullable=False) # DateTime field
-    subject = db.Column(db.Integer, db.ForeignKey('user_subject.id'), nullable=False)
-    attnd_status = db.Column(db.Text(10))
 
 # Table for associating the time which a subject is on to the subject
 class SubjectTimes(db.Model):
