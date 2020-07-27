@@ -336,7 +336,6 @@ def logtime():
     try:
         user_code = request.form['user']
         card_uid = request.form['card_uid']
-        subject_code = request.form['subject']
     except:
         print("Failed to obtain values")
     else:
@@ -365,6 +364,12 @@ def logtime():
 # Function for returning the start time, used for sorting times
 def get_start_time(time):
     return time.start_time
+
+# TODO: create table for all the requested accounts to be scanned to card
+@app.route("/get_users", methods=['GET'])
+def get_users():
+    
+    return None
 
 # Route for setting default times which a subject/class can be on at
 @app.route('/add_times', methods=['GET', 'POST'])
