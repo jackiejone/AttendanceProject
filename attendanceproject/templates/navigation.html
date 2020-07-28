@@ -8,6 +8,7 @@
                 {% if current_user.auth == 'teacher' %}
                     <li><a href="{{url_for('create_class')}}">New Class</a></li>
                     <li><a href="{{url_for('addtime')}}">Add Times</a></li>
+                    <li><a href="{{url_for('scanner')}}">Add Scanner</a></li>
                 {% endif %}
             {% endif %}
         </div>

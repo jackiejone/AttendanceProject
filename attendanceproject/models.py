@@ -30,6 +30,14 @@ class AttendanceTime(db.Model):
     time = db.Column(db.DateTime, nullable=False) # DateTime field
     user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     attnd_status = db.Column(db.Text(10))
+    subject = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False)
+
+class Scanner(db.Model):
+    __tablename__ = "scanner"
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    scanner_id = db.Column(db.Text(5), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False, unique=True)
+    subject = db.relationship("SubjectCode", back_populates="scanner")
 
 # Table for storing RFID tags and associating them with a user (student) as one user could
 # have multiple tags. The tags also have UIDs which can be used for authentication 
@@ -74,6 +82,7 @@ class SubjectCode(db.Model):
     join_code = db.Column(db.Text(10), unique=True, nullable=False)
     users = db.relationship('UserSubject', back_populates='subject')
     times = db.relationship('SubjectTimes', back_populates='subject')
+    scanner = db.relationship('Scanner', back_populates='subject')
 
 # Table for storing the possible times for a class
 class Times(db.Model):

@@ -116,3 +116,9 @@ class SetTimesForm(FlaskForm):
     day = SelectField('Day', choices=[(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'),
                                       (3, 'Thursday'), (4, 'Friday')], coerce=int)
     add = SubmitField('Add Time')
+
+class AddScanner(FlaskForm):
+    scanner = StringField('Scanner ID', validators=[InputRequired(),
+                                           Length(min=1, max=5, message='Scanner ID has a max 5 Characters')], render_kw={'placeholder': 'Scanner ID'})
+    subject = SelectField('Subject', coerce=int)
+    submit = SubmitField('Submit')

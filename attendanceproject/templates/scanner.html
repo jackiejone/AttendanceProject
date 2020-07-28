@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class='scanner'>
+        <h1>Scanner</h1>
+        
+
+        {% if not form.subject.choices %}
+            <p>Please add subjects before adding Scanners</p>
+        {% else %}
+            <!-- Form for adding a class to a scanner -->
+            <form action='' method='POST'>
+                    {{ form.csrf_token }}
+                    {{ render_field(form.scanner) }}
+                    {{ render_field(form.subject) }}
+                    <div class='submit'>{{ form.submit }}</div>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

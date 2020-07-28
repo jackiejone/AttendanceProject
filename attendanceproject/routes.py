@@ -503,6 +503,33 @@ def settimes(class_code):
     times = subject.times
     return render_template('settimes.html', form=form, times=times, days=CONSTANT_DAYS)
 
+@app.route("/scanner", methods=['GET', 'POST'])
+@login_required
+def scanner():
+    if current_user.auth != 'teacher':
+        flash('You do not have permission to access this page')
+        return redirect(url_for('home'))
+    
+    add_scanner_form = AddScanner()
+    add_scanner_form.subject.choices = [(int(sub.id), sub.code) for sub in SubjectCode.query.all()]
+
+    if request.method == 'POST' and add_scanner_form.validate_on_submit():
+        scan_id = add_scanner_form.scanner.data.strip().lower()
+        if Scanner.query.filter_by(subject_id=add_scanner_form.subject.data).first():
+            flash('Subject already has an associated scanner')
+        else:
+            try:
+                new_scanner = Scanner(scanner_id=scan_id, subject_id=add_scanner_form.subject.data)
+                db.session.add(new_scanner)
+                db.session.flush()
+            except IntegrityError:
+                db.session.rollback()
+                flash('Subject was already associated with scanner')
+            else:
+                flash('Subject successfully added to scanner')
+                db.session.commit()
+    return render_template('scanner.html', form=add_scanner_form)
+
 # Route for handling error 404
 @app.errorhandler(404)
 def error404(e):
