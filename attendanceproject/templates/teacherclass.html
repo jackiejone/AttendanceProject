@@ -23,6 +23,14 @@
         </ul>
     {% endif %}
 
+    <form method='POST' action=''>
+        {{ form.csrf_token }}
+        {{ render_field(form.day) }}
+        {{ render_field(form.month) }}
+        {{ render_field(form.status) }}
+        {{ form.submit }}
+    </form>
+
     <ul>
         {% for i in times %}
             <li>{{ i }}</li>

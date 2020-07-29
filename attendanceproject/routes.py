@@ -281,7 +281,7 @@ def std_attnd(student, subject):
     AB = 'A'
     x = 0
     week_num = 1
-    for i in range(1, 356):
+    for i in range(1, 357):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
@@ -301,13 +301,31 @@ def std_attnd(student, subject):
 
     return weeks
 
+# This function checks if the a subject is on a particular date
+def check_class_date(student_date, subject):
+    subject_dates = []
+    AB = 'A'
+    x = 0
+    for i in range(1, 357):
+        date = datetime.timedelta(days=i)
+        start_date = datetime.date(2019, 12, 31)
+        end_date = start_date + date
+        for y in subject.times:
+            if end_date.isoweekday() == y.sday and x == y.sweek and end_date == student_date:
+                return True
+        if end_date.isoweekday() == 5 and AB == 'A':
+            AB = 'B'
+        elif end_date.isoweekday() == 5 and AB == 'B':
+            AB = 'A'
+    return False
+
     # TODO: This function checks the user's login times against the subjects predefined times but you want the predefines times to be
     # checked against the user's login times so you can add an if statement to see if there was no class on that day. You also need to implement
     # the days of the subject's predefined times into this so it actually works
     # You also need to do some time math here concering the week in comparison to the days of the year
  
 # Route for viewing a subject/class for a specific user as a specfic user
-@app.route('/account/<user_code>/classes/<class_code>')
+@app.route('/account/<user_code>/classes/<class_code>', methods=["GET", "POST"])
 @login_required
 def class_code(class_code, user_code):
     subject = SubjectCode.query.filter_by(code=class_code).first()
@@ -317,14 +335,27 @@ def class_code(class_code, user_code):
     user = User.query.filter_by(user_code=user_code).first()
     if user: # TODO: Check if the user is the student, a teacher and if the user is the current user or not
         # User is a teacher and they're viewing their class
+
+
+        # For this one, show the attendane of each student in the class on a certain day
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]):
             c_code = class_code
             times = std_attnd(current_user, subject)
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, times=times)
+            form = AddStudentAttndTime()
+
+            if request.method == "POST" and form.validate_on_submit():
+                date = datetime.date(year=datetime.date.today().year, month=form.month.data, day=form.day.data)
+                if check_class_date(date, subject):
+                    None
+                    # TODO: add time and attendance value to the database and reset the database
+                else:
+                    flash('Date was not a valid date for the subject')
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, times=times, form=form)
         
         # User is a teacher but they're not viewing one of their class
-        elif current_user.auth == 'teacher':
+        # For this one, show the attendance of the student and be able to change attendnance
+        elif current_user.auth == 'teacher' and user.auth == 'student':
             return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS)
         
         # User is a student and they're viewing their class

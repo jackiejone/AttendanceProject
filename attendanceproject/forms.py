@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SelectField, IntegerField, PasswordField,
                      BooleanField, SubmitField, SelectMultipleField, FieldList,
-                     FormField, RadioField)
+                     FormField, RadioField, DateField)
 from wtforms.widgets import CheckboxInput, ListWidget
 from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError, AnyOf, StopValidation
 from wtforms.fields.html5 import TimeField
@@ -124,5 +124,9 @@ class AddScanner(FlaskForm):
     subject = SelectField('Subject', coerce=int)
     submit = SubmitField('Submit')
 
-class AddStudentAttnd(FlaskForm):
+class AddStudentAttndTime(FlaskForm):
+    day = SelectField("Day", choices=[(x , x) for x in range(1, 32)], coerce=int)
+    month = SelectField("Month", choices=[(x, x) for x in range(1, 13)], coerce=int)
+    status = SelectField('Attendance Status', choices=[(0, 'Present'), (1, 'Late'), (2, 'Absent')], coerce=int, validators=[InputRequired()])
+    submit = SubmitField('Submit')
     
