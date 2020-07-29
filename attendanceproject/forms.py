@@ -117,8 +117,12 @@ class SetTimesForm(FlaskForm):
                                       (3, 'Thursday'), (4, 'Friday')], coerce=int)
     add = SubmitField('Add Time')
 
+# Form for associating a scanner with a class
 class AddScanner(FlaskForm):
     scanner = StringField('Scanner ID', validators=[InputRequired(),
                                            Length(min=1, max=5, message='Scanner ID has a max 5 Characters')], render_kw={'placeholder': 'Scanner ID'})
     subject = SelectField('Subject', coerce=int)
     submit = SubmitField('Submit')
+
+class AddStudentAttnd(FlaskForm):
+    

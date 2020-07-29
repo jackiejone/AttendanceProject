@@ -23,5 +23,10 @@
         </ul>
     {% endif %}
 
+    <ul>
+        {% for i in times %}
+            <li>{{ i }}</li>
+        {% endfor %}
+    </ul>
     <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
 {% endblock %}

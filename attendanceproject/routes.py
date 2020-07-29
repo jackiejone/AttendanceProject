@@ -276,7 +276,7 @@ def view_subject(subject):
 
 # TODO: Implement way of adding times to the database
 def std_attnd(student, subject):
-    
+    """
     weeks = []
     AB = 'A'
     x = 0
@@ -286,25 +286,19 @@ def std_attnd(student, subject):
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
         if end_date.isoweekday() in [1, 2, 3, 4, 5]:
-            if end_date in student.attnd_times.time.date():
-                # TODO: compare time of students attendance datetime to the class times of the subject to chekc if the student was present at that time.
-                student_attnd_date = [d for d in student.attnd_times.time.time() if end_date == student.attnd.time.date()]
-                if AB == "A":
-                    x = 0
-                elif AB == "B":
-                    x = 1
-                sub = SubjectTimes.query.filter_by(subject_id=subject.id, sday=end_date.isoweekday(), sweek=x).first()
-                if student_attnd_date >= sub.time.start_time and student_attnd_date <= sub.time.end_time:
-                    weeks.append((AB, week_num, end_date, student.attnd_times.attnd_status))  # do i need to have the if statement above this?
-                # TODO: Make another column in attnd_times table for which class they we're meant to be attending. To do this you need to make another table for each scanner and attach the scanner to the subject class object via many to many association
+            if subject.id in [s.subject for s in student.attnd_times]:
+                weeks.append((AB, week_num, end_date, [d for d in subject.times.time if d.time.start_time], [s.attnd_status for s in student.attnd_times if student.attnd_times.time.date() == end_date]))
             else:
-                weeks.append((AB, week_num, end_date, "Unknown"))
+                weeks.append((AB, week_num, end_date, [d.time.start_time for d in subject.times if d.sweek==x and d.sday==end_date.isoweekday()], "N/A"))
             if end_date.isoweekday() == 5 and AB == 'A':
                 AB = 'B'
                 week_num += 1
             elif end_date.isoweekday() == 5 and AB == 'B':
                 AB = 'A'
                 week_num += 1
+    """
+    weeks = [(x.time, x.attnd_status) for x in student.attnd_times if x.subject == subject.id]
+
     return weeks
 
     # TODO: This function checks the user's login times against the subjects predefined times but you want the predefines times to be
@@ -317,19 +311,19 @@ def std_attnd(student, subject):
 @login_required
 def class_code(class_code, user_code):
     subject = SubjectCode.query.filter_by(code=class_code).first()
-    std_attnd(current_user, subject)
     if not subject:
         flash('Class could not be found')
         return redirect(url_for('classes', user_code=current_user.user_code))
     user = User.query.filter_by(user_code=user_code).first()
     if user: # TODO: Check if the user is the student, a teacher and if the user is the current user or not
-        # User is a teacher and they're viewing their class/es
+        # User is a teacher and they're viewing their class
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]):
             c_code = class_code
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS)
+            times = std_attnd(current_user, subject)
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, times=times)
         
-        # User is a teacher but they're not viewing one of their classes
+        # User is a teacher but they're not viewing one of their class
         elif current_user.auth == 'teacher':
             return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS)
         
@@ -338,7 +332,7 @@ def class_code(class_code, user_code):
             [x.subject.code for x in current_user.subjects]):
             return render_template("studentclass.html", subject=subject, days=CONSTANT_DAYS)
         
-        # User is a student but they're not viewing one of their classes
+        # User is a student but they're not viewing one of their class
         else:
             flash('You do not have access to this page')
             return redirect(url_for('classes', user_code=current_user.user_code))
@@ -378,8 +372,6 @@ def logtime():
         if subject_code not in [x.subject.code for x in user.subjects]:
             return "You are not in this class"
 
-# TODO: remove association of attendance time to UserSubject and just associate it with the user.
-# LOG DATABASE CHANGES IN DOCUMENT
         if user_id and uid:
             if User.query.filter_by(user_code=user_id).first():
                 print('duplicate')
@@ -390,15 +382,17 @@ def logtime():
                 print('successfully added')
     return user_id, uid
 
-# Function for returning the start time, used for sorting times
-def get_start_time(time):
-    return time.start_time
+
 
 # TODO: create table for all the requested accounts to be scanned to card
 @app.route("/get_users", methods=['GET'])
 def get_users():
     
     return None
+
+# Function for returning the start time, used for sorting times
+def get_start_time(time):
+    return time.start_time
 
 # Route for setting default times which a subject/class can be on at
 @app.route('/add_times', methods=['GET', 'POST'])
@@ -503,6 +497,7 @@ def settimes(class_code):
     times = subject.times
     return render_template('settimes.html', form=form, times=times, days=CONSTANT_DAYS)
 
+# Route for adding a scanner to a subject/class
 @app.route("/scanner", methods=['GET', 'POST'])
 @login_required
 def scanner():
