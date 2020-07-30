@@ -341,6 +341,12 @@ def class_code(class_code, user_code):
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]):
             c_code = class_code
+            print([x.user.fname for x in subject.users])
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS)
+        
+        # User is a teacher viewing the class of a student
+        # For this one, show the attendance of the student and be able to change attendnance
+        elif current_user.auth == 'teacher' and user.auth == 'student':
             times = std_attnd(current_user, subject)
             form = AddStudentAttndTime()
 
@@ -348,15 +354,10 @@ def class_code(class_code, user_code):
                 date = datetime.date(year=datetime.date.today().year, month=form.month.data, day=form.day.data)
                 if check_class_date(date, subject):
                     None
-                    # TODO: add time and attendance value to the database and reset the database
+                    # TODO: add time and attendance values to the database and reset the database
                 else:
                     flash('Date was not a valid date for the subject')
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, times=times, form=form)
-        
-        # User is a teacher but they're not viewing one of their class
-        # For this one, show the attendance of the student and be able to change attendnance
-        elif current_user.auth == 'teacher' and user.auth == 'student':
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS)
+            return render_template("teacherstudentclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, student_times=times, form=form)
         
         # User is a student and they're viewing their class
         elif (current_user.auth == 'student' and class_code in

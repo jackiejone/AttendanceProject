@@ -20,14 +20,29 @@
             {% if user.user_type == 'student' %}
                 <li>{{ user.user.fname }}</li>
                 {% set students = True %}
-                {{ students }}
             {% endif %}
         {% endfor %}
         </ul>
         {% if students == False %}
             <p>No students in this class</p>
         {% endif %}
-        {{ students }}
+        {{ subject.users }}
+    {% endif %}
+
+    <form method='POST' action=''>
+        {{ form.csrf_token }}
+        {{ render_field(form.day) }}
+        {{ render_field(form.month) }}
+        {{ render_field(form.status) }}
+        {{ form.submit }}
+    </form>
+
+    {% if times %}
+        <ul>
+            {% for time in student_times %}
+                <li>{{ time }}</li>
+            {% endfor %}
+        </ul>
     {% endif %}
     <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
 {% endblock %}
