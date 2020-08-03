@@ -155,3 +155,9 @@ body {
   color: var(--headings);
   display: inline;
 }
+
+.capatalize {
+  text-transform: capitalize;
+  display: inline-block;
+  color: var(--headings);
+}

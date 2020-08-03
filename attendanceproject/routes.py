@@ -281,7 +281,7 @@ def std_attnd(student, subject):
     AB = 'A'
     x = 0
     week_num = 1
-    for i in range(1, 357):
+    for i in range(1, 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
@@ -306,7 +306,7 @@ def check_class_date(student_date, subject):
     subject_dates = []
     AB = 'A'
     x = 0
-    for i in range(1, 357):
+    for i in range(1, 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
@@ -324,10 +324,19 @@ def check_class_date(student_date, subject):
     # the days of the subject's predefined times into this so it actually works
     # You also need to do some time math here concering the week in comparison to the days of the year
  
+ # This function returns the nth day of the year
+def day_num(_date=datetime.date.today()):
+    for i in range(1, 366):
+        date = datetime.timedelta(days=i)
+        start_date = datetime.date(2019, 12, 31)
+        end_date = start_date + date
+        if end_date == datetime.date.today():
+            return i
+
 # Route for viewing a subject/class for a specific user as a specfic user
-@app.route('/account/<user_code>/classes/<class_code>', methods=["GET", "POST"])
+@app.route('/account/<user_code>/classes/<class_code>/<day>', defaults={'day': day_num()}, methods=["GET", "POST"])
 @login_required
-def class_code(class_code, user_code):
+def class_code(class_code, user_code, day):
     subject = SubjectCode.query.filter_by(code=class_code).first()
     if not subject:
         flash('Class could not be found')
@@ -341,11 +350,27 @@ def class_code(class_code, user_code):
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]):
             c_code = class_code
-            print([x.user.fname for x in subject.users])
-            students_in_class = 0
+
+            # Getting the date of which the user is viewing via the "day" parameter in the link
+            total_days = day - day_num()
+            current_date = (datetime.date.today() - datetime.timedelta(days=total_days)).strftime('%d/%m/%y')
+
+            student_times = [] # Variable for the times of the students in the class
+            students_in_class = 0 # Variable usd to check if there are students in the class
             if 'student' in [user.user_type for user in subject.users]:
                 students_in_class = 1
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class)
+                # Getting the attendance status of each student in the class for a specific date
+                for user in subject.users:
+                    if user.user_type == 'student':
+                        if user.user.attnd_times:
+                            for t in user.user.attnd_times:
+                                if t.time.date == current_date:
+                                    student_times.append((user.user, t.attnd_status))
+                                else:
+                                    student_times.append((user.user, "N/A"))
+                        else:
+                            student_times.append((user.user, "N/A"))
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date, student_times=student_times)
         
         # User is a teacher viewing the class of a student
         # For this one, show the attendance of the student and be able to change attendnance

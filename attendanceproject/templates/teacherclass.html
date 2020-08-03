@@ -24,5 +24,13 @@
     {% else %}
         <p>No students in this class</p>
     {% endif %}
+    
+    <h2>Attendance for {{ current_date }}</h2>
+    <ul>
+        {% for i in student_times %}
+            <li>Student: <div class='capatalize'>{{ i[0].fname }}</div> Status: <div class='capatalize'>{{ i[1] }}</div></li>
+        {% endfor %}
+    </ul>
+    </br>
     <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
 {% endblock %}
