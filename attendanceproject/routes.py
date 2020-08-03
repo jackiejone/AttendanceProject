@@ -348,7 +348,7 @@ def class_code(class_code, user_code, day):
 
         # For this one, show the attendane of each student in the class on a certain day
         if (current_user.auth == 'teacher' and class_code in
-            [x.subject.code for x in current_user.subjects]):
+            [x.subject.code for x in current_user.subjects]) and user == current_user:
             c_code = class_code
 
             # Getting the date of which the user is viewing via the "day" parameter in the link
@@ -384,6 +384,7 @@ def class_code(class_code, user_code, day):
                     None
 
                     # TODO: add time and attendance values to the database
+                    # TODO: Return values of valid dates into a selectfield for the form
                 else:
                     flash('Date was not a valid date for the subject')
             return render_template("teacherstudentclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, student_times=times, form=form)
