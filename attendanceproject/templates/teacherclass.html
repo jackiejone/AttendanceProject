@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>{{ subject.name }} {{ user.fname }} {{ user.lname }}</h1>
+    <h1>Viewing <div class='name'>{{ subject.name }}</div> as <div class='name'>{{ user.fname }} {{ user.lname }}</div></h1>
 
     <!-- Displaying all the users in the class if the user viewing the class is a teacher -->
     <h2>Times</h2>
@@ -13,21 +13,16 @@
     {% endif %}
     
     <h2>Students</h2>
-    {% if subject.users %}
-        {% set students = False %}
+    {% if students_in_class %}
         <ul>
         {% for user in subject.users %}
-            {% if user.user_type == 'student' %}
+            {% if user.user_type == 'student'%}
                 <li>{{ user.user.fname }}</li>
-                {% set students = True %}
-                {{ students }}
             {% endif %}
         {% endfor %}
         </ul>
-        {% if students == False %}
-            <p>No students in this class</p>
-        {% endif %}
-        {{ students }}
+    {% else %}
+        <p>No students in this class</p>
     {% endif %}
     <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
 {% endblock %}

@@ -149,3 +149,9 @@ body {
 }
 
 /* register-login Page End */
+
+
+.name {
+  color: var(--headings);
+  display: inline;
+}

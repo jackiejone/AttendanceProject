@@ -342,7 +342,10 @@ def class_code(class_code, user_code):
             [x.subject.code for x in current_user.subjects]):
             c_code = class_code
             print([x.user.fname for x in subject.users])
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS)
+            students_in_class = 0
+            if 'student' in [user.user_type for user in subject.users]:
+                students_in_class = 1
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class)
         
         # User is a teacher viewing the class of a student
         # For this one, show the attendance of the student and be able to change attendnance
@@ -354,7 +357,8 @@ def class_code(class_code, user_code):
                 date = datetime.date(year=datetime.date.today().year, month=form.month.data, day=form.day.data)
                 if check_class_date(date, subject):
                     None
-                    # TODO: add time and attendance values to the database and reset the database
+
+                    # TODO: add time and attendance values to the database
                 else:
                     flash('Date was not a valid date for the subject')
             return render_template("teacherstudentclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, student_times=times, form=form)

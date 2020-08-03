@@ -14,19 +14,13 @@
     
     <h2>Students</h2>
     {% if subject.users %}
-        {% set students = False %}
         <ul>
         {% for user in subject.users %}
             {% if user.user_type == 'student' %}
                 <li>{{ user.user.fname }}</li>
-                {% set students = True %}
             {% endif %}
         {% endfor %}
         </ul>
-        {% if students == False %}
-            <p>No students in this class</p>
-        {% endif %}
-        {{ subject.users }}
     {% endif %}
 
     <form method='POST' action=''>
