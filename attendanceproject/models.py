@@ -91,3 +91,12 @@ class Times(db.Model):
     start_time = db.Column(db.Time, unique=True, nullable=False)
     end_time = db.Column(db.Time, unique=True, nullable=False)
     subjects = db.relationship("SubjectTimes", back_populates='time')
+
+# Table for queueing data to be scanned onto tags
+class TagQueue(db.Model):
+    __tablename__ = "tag_queue"
+    
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    scanner = db.Column(db.Integer, db.ForeignKey('scanner.id', nullable=False))
+    
