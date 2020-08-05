@@ -419,8 +419,10 @@ def logtime():
     try:
         user_code = request.form['user']
         card_uid = request.form['card_uid']
+        scanner_id = request.form['scanner_id']
     except:
         print("Failed to obtain values")
+        return "Error"
     else:
         user = User.query.filter_by(user_code=user_id).first()
         current_datetime = datetime.now()
@@ -430,18 +432,32 @@ def logtime():
         if card_uid not in [tag.tag_uid for tag in user.tags]:
             return "Unidentified Card"
         
-
-        if subject_code not in [x.subject.code for x in user.subjects]:
-            return "You are not in this class"
-
-        if user_id and uid:
-            if User.query.filter_by(user_code=user_id).first():
-                print('duplicate')
-            else:
-                new_user = User(user_code=user_id)
-                db.session.add(new_user)
-                db.session.commit()
-                print('successfully added')
+        scanner = Scanner.query.filter_by(scanner_id=scanner_id).first()
+        if not scanner:
+            return "Unidentified Scanner"
+        else:
+            # Does stuff \/
+            for i in scanner.subject:
+                for x in i.users:
+                    if x.user == user:
+                        for z in [y.time for y in i.times]:
+                            if current_datetime.time() >= z.start_time and current_datetime.time() <= z.end_time:
+                                try:
+                                    new_time = AttendanceTime(time=current_datetime, user=user.id, attnd_status='present', subject=i.id)
+                                    db.session.add(new_time)
+                                    db.session.flush()
+                                except:
+                                    return 'An Error Occured'
+                                else:
+                                    return 'Success'
+                        try:
+                            new_time = AttendanceTime(time=current_datetime, user=user.id, attnd_status='N/A', subject=i.id)
+                            db.session.add(new_time)
+                            db.session.flush()
+                        except:
+                            return 'An Error Occured'
+                        else:
+                            return 'Success'
     return user_id, uid
 
 
