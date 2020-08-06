@@ -24,20 +24,23 @@
     {% endif %}
 
     <h2>Class Times</h2>
-    <ul>
-        {% for i in class_times %}
-            <li>
-                {% for x in range(i|length) %}
-                    {{ i[x] }}
-                {% endfor %}
-            </li>
-        {% endfor %}
-    </ul>
+    <div style="height:400px;width:500px;border:1px solid #ccc;overflow:auto;">
+        <ul>
+            {% for i in class_times %}
+                <li>
+                    {% for x in range(i|length) %}
+                        {{ i[x] }}
+                    {% endfor %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
     <form method='POST' action=''>
         {{ form.csrf_token }}
-        {{ render_field(form.day) }}
-        {{ render_field(form.month) }}
-        {{ render_field(form.status) }}
+        day {{ form.day }}
+        month {{ form.month }}
+        status {{ form.status }}
         {{ form.submit }}
     </form>
 
