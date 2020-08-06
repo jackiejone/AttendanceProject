@@ -98,5 +98,5 @@ class TagQueue(db.Model):
     
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    scanner = db.Column(db.Integer, db.ForeignKey('scanner.id', nullable=False))
+    scanner = db.Column(db.Integer, db.ForeignKey('scanner.id'), nullable=False)
     

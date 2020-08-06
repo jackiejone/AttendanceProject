@@ -312,17 +312,37 @@ def check_class_date(student_date, subject):
         end_date = start_date + date
         for y in subject.times:
             if end_date.isoweekday() == y.sday and x == y.sweek and end_date == student_date:
+                print(f"{y.sday}, {y.sweek}, {end_date}, {student_date}")
                 return True
         if end_date.isoweekday() == 5 and AB == 'A':
             AB = 'B'
         elif end_date.isoweekday() == 5 and AB == 'B':
             AB = 'A'
+    print('False')
     return False
+
+def get_class_dates(subject):
+    subject_dates = []
+    AB = 'A'
+    x = 0
+    for i in range(1, 366):
+        date = datetime.timedelta(days=i)
+        start_date = datetime.date(2019, 12, 31)
+        end_date = start_date + date
+        for y in subject.times:
+            if end_date.isoweekday() == y.sday and x == y.sweek:
+                subject_dates.append((end_date, CONSTANT_DAYS[y.sday], 'Week A' if y.sweek else 'Week B', y.time.start_time))
+        if end_date.isoweekday() == 5 and AB == 'A':
+            AB = 'B'
+        elif end_date.isoweekday() == 5 and AB == 'B':
+            AB = 'A'
+    return subject_dates
 
     # TODO: This function checks the user's login times against the subjects predefined times but you want the predefines times to be
     # checked against the user's login times so you can add an if statement to see if there was no class on that day. You also need to implement
     # the days of the subject's predefined times into this so it actually works
     # You also need to do some time math here concering the week in comparison to the days of the year
+    # What
  
  # This function returns the nth day of the year
 def day_num(_date=datetime.date.today()):
@@ -387,7 +407,8 @@ def class_code(class_code, user_code, day):
                     # TODO: Return values of valid dates into a selectfield for the form
                 else:
                     flash('Date was not a valid date for the subject')
-            return render_template("teacherstudentclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, student_times=times, form=form)
+            class_times = get_class_dates(subject)
+            return render_template("teacherstudentclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, student_times=times, form=form, class_times=class_times)
         
         # User is a student and they're viewing their class
         elif (current_user.auth == 'student' and class_code in
