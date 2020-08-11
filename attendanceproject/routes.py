@@ -331,7 +331,8 @@ def get_class_dates(subject):
         end_date = start_date + date
         for y in subject.times:
             if end_date.isoweekday() == y.sday and x == y.sweek:
-                subject_dates.append((end_date, CONSTANT_DAYS[y.sday], 'Week A' if y.sweek else 'Week B', y.time.start_time))
+                # TODO: Broken - y.sweek always returning false
+                subject_dates.append((end_date, CONSTANT_DAYS[y.sday], 'Week A' if not y.sweek else 'Week B', y.time.start_time))
         if end_date.isoweekday() == 5 and AB == 'A':
             AB = 'B'
         elif end_date.isoweekday() == 5 and AB == 'B':
