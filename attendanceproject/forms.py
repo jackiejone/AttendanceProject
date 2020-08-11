@@ -106,16 +106,18 @@ class AddTimesForm(FlaskForm):
     time = TimeField(label='Add a Time', format='%H:%M', validators=[check_time, InputRequired()])
     add_time = SubmitField('Confirm')
 
-def get_start_time(time):
-    return time.start_time
-
-# Form for associating a time with a class
+# Form for associating a time with a class/subject
 class SetTimesForm(FlaskForm):
     time = SelectField('Start Time', validators=None, coerce=int)
     week = RadioField('Week', choices=[(0, 'A'), (1, 'B')], coerce=int)
     day = SelectField('Day', choices=[(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'),
                                       (3, 'Thursday'), (4, 'Friday')], coerce=int)
     add = SubmitField('Add Time')
+
+# Form for dissociating a time with a class/subject
+class UnsetTimesForm(FlaskForm):
+    time = SelectField('Time')
+    remove = SubmitField('Remove Time')
 
 # Form for associating a scanner with a class
 class AddScanner(FlaskForm):
