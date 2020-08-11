@@ -116,7 +116,7 @@ class SetTimesForm(FlaskForm):
 
 # Form for dissociating a time with a class/subject
 class UnsetTimesForm(FlaskForm):
-    time = SelectField('Time')
+    time = SelectField('Time', coerce=int)
     remove = SubmitField('Remove Time')
 
 # Form for associating a scanner with a class

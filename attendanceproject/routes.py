@@ -329,22 +329,12 @@ def get_class_dates(subject):
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
         for y in subject.times:
-<<<<<<< HEAD
-            if end_date.isoweekday() == y.sday and x == y.sweek:
-                # TODO: Broken - y.sweek always returning false
-                subject_dates.append((end_date, CONSTANT_DAYS[y.sday], 'Week A' if not y.sweek else 'Week B', y.time.start_time))
-        if end_date.isoweekday() == 5 and AB == 'A':
-            AB = 'B'
-        elif end_date.isoweekday() == 5 and AB == 'B':
-            AB = 'A'
-=======
             if end_date.isoweekday() == y.sday and AB == y.sweek:
                 subject_dates.append((end_date, CONSTANT_DAYS[y.sday], 'Week A' if not y.sweek else 'Week B', y.time.start_time))
         if end_date.isoweekday() == 5 and AB == 0:
             AB = 1
         elif end_date.isoweekday() == 5 and AB == 1:
             AB = 0
->>>>>>> refs/remotes/origin/master
     return subject_dates
 
     # TODO: This function checks the user's login times against the subjects predefined times but you want the predefines times to be
@@ -580,7 +570,9 @@ def settimes(class_code):
     if subject:
         set_times_form = SetTimesForm()
         set_times_form.time.choices = get_times()
-        if request.method == 'POST' and form.validate_on_submit():
+        remove_times_form = UnsetTimesForm()
+        remove_times_form.time.choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
+        if request.method == 'POST' and set_times_form.validate_on_submit():
             # Checking if the class already has a combination of day, time, and week
             if SubjectTimes.query.filter_by(subject_id=subject.id,
                                             stime_id=set_times_form.time.data,
@@ -601,15 +593,27 @@ def settimes(class_code):
                 subject.times.append(asso)
                 db.session.commit()
                 flash('Successfully set time')
-        #TODO: BROKEN!
-        remove_times_form = UnsetTimesForm()
-        remove_times_form.time.chocies = [(x.id, f"{x.time.start_time} {x.sweek} {'A' if not x.sday else 'B'}") for x in subject.times]
-        print([(x.id, f"{x.time.start_time} {x.sweek} {'A' if not x.sday else 'B'}") for x in subject.times])
+                
+        elif request.method == 'POST' and remove_times_form.validate_on_submit():
+            print(remove_times_form.time.data)
+            return 1
+        
     else:
         flash('Class was not found')
         return redirect(url_for('classes', user_code=current_user.user_code))
     times = subject.times
     return render_template('settimes.html', form=set_times_form, remove_times_form=remove_times_form, times=times, days=CONSTANT_DAYS)
+
+@app.route("/removetimes", methods=['POST'])
+@login_required
+def removetimes():
+    form = UnsetTimesForm(request.form)
+    form.time.choices = [(1, 1)]
+    if form.validate_on_submit():
+        print(request.form['time'])
+    else:
+        print('no')
+    return 'yes'
 
 # Route for adding a scanner to a subject/class
 @app.route("/scanner", methods=['GET', 'POST'])
