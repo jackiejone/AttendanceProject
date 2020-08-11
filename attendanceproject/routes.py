@@ -214,7 +214,7 @@ def create_class():
     if request.method == 'POST' and form.validate_on_submit():
         # Prepares form data For insertion into database
         class_name = form.cname.data.capitalize().strip().lower()
-        class_code = form.ccode.data
+        class_code = form.ccode.data.strip().upper()
         join_code = generate_code()
         # Creates new class object with data from the form
         new_class = SubjectCode(name=class_name, code=class_code,
@@ -304,38 +304,37 @@ def std_attnd(student, subject):
 # This function checks if the a subject is on a particular date
 def check_class_date(student_date, subject):
     subject_dates = []
-    AB = 'A'
+    AB = 0
     x = 0
     for i in range(1, 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
         for y in subject.times:
-            if end_date.isoweekday() == y.sday and x == y.sweek and end_date == student_date:
+            if end_date.isoweekday() == y.sday and AB == y.sweek and end_date == student_date:
                 print(f"{y.sday}, {y.sweek}, {end_date}, {student_date}")
                 return True
-        if end_date.isoweekday() == 5 and AB == 'A':
-            AB = 'B'
-        elif end_date.isoweekday() == 5 and AB == 'B':
-            AB = 'A'
+        if end_date.isoweekday() == 5 and AB == 0:
+            AB = 1
+        elif end_date.isoweekday() == 5 and AB == 1:
+            AB = 0
     print('False')
     return False
 
 def get_class_dates(subject):
     subject_dates = []
-    AB = 'A'
-    x = 0
+    AB = 0
     for i in range(1, 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
         for y in subject.times:
-            if end_date.isoweekday() == y.sday and x == y.sweek:
-                subject_dates.append((end_date, CONSTANT_DAYS[y.sday], 'Week A' if y.sweek else 'Week B', y.time.start_time))
-        if end_date.isoweekday() == 5 and AB == 'A':
-            AB = 'B'
-        elif end_date.isoweekday() == 5 and AB == 'B':
-            AB = 'A'
+            if end_date.isoweekday() == y.sday and AB == y.sweek:
+                subject_dates.append((end_date, CONSTANT_DAYS[y.sday], 'Week A' if not y.sweek else 'Week B', y.time.start_time))
+        if end_date.isoweekday() == 5 and AB == 0:
+            AB = 1
+        elif end_date.isoweekday() == 5 and AB == 1:
+            AB = 0
     return subject_dates
 
     # TODO: This function checks the user's login times against the subjects predefined times but you want the predefines times to be
@@ -362,10 +361,7 @@ def class_code(class_code, user_code, day):
         flash('Class could not be found')
         return redirect(url_for('classes', user_code=current_user.user_code))
     user = User.query.filter_by(user_code=user_code).first()
-    if user: # TODO: Check if the user is the student, a teacher and if the user is the current user or not
-        # User is a teacher and they're viewing their class
-
-
+    if user:
         # For this one, show the attendane of each student in the class on a certain day
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]) and user == current_user:
@@ -376,7 +372,7 @@ def class_code(class_code, user_code, day):
             current_date = (datetime.date.today() - datetime.timedelta(days=total_days)).strftime('%d/%m/%y')
 
             student_times = [] # Variable for the times of the students in the class
-            students_in_class = 0 # Variable usd to check if there are students in the class
+            students_in_class = 0 # Variable used to check if there are students in the class
             if 'student' in [user.user_type for user in subject.users]:
                 students_in_class = 1
                 # Getting the attendance status of each student in the class for a specific date
@@ -457,7 +453,7 @@ def logtime():
         if not scanner:
             return "Unidentified Scanner"
         else:
-            # Does stuff \/
+            # Does stuff V?
             for i in scanner.subject:
                 for x in i.users:
                     if x.user == user:
@@ -561,6 +557,7 @@ def get_times():
     
 # Route for setting the time of a specific class/subject for each
 # week and day
+# TODO: Make sure that a class can only be on once a day (i.e. once for every combination of Week and Day)
 @app.route('/classes/<class_code>/settimes', methods=["GET", "POST"])
 @login_required
 def settimes(class_code):
@@ -571,30 +568,38 @@ def settimes(class_code):
     # Checking if the class exists
     subject = SubjectCode.query.filter_by(code=class_code).first()
     if subject:
-        form = SetTimesForm()
-        form.time.choices = get_times()
+        set_times_form = SetTimesForm()
+        set_times_form.time.choices = get_times()
         if request.method == 'POST' and form.validate_on_submit():
             # Checking if the class already has a combination of day, time, and week
             if SubjectTimes.query.filter_by(subject_id=subject.id,
-                                            stime_id=form.time.data,
-                                            sweek=form.week.data,
-                                            sday=form.day.data).first():
+                                            stime_id=set_times_form.time.data,
+                                            sweek=set_times_form.week.data,
+                                            sday=set_times_form.day.data).first():
                 flash('This time is already assocaited with the class')
             # Checking if the subject has the maxmium amount of times
+            elif SubjectTimes.query.filter_by(subject_id=subject.id,
+                                              sweek=set_times_form.week.data,
+                                              sday=set_times_form.day.data).first():
+                flash('This class already has a time of this day')
             elif len(subject.times) >= 10:
                 flash('Maxmium amount of times of 10 for this classes reached.')
             # Setting the time for the class which the user entered into the form
             else:
-                asso = SubjectTimes(sweek=form.week.data, sday=form.day.data)
-                asso.time = Times.query.filter_by(id=form.time.data).first()
+                asso = SubjectTimes(sweek=set_times_form.week.data, sday=set_times_form.day.data)
+                asso.time = Times.query.filter_by(id=set_times_form.time.data).first()
                 subject.times.append(asso)
                 db.session.commit()
                 flash('Successfully set time')
+        #TODO: BROKEN!
+        remove_times_form = UnsetTimesForm()
+        remove_times_form.time.chocies = [(x.id, f"{x.time.start_time} {x.sweek} {'A' if not x.sday else 'B'}") for x in subject.times]
+        print([(x.id, f"{x.time.start_time} {x.sweek} {'A' if not x.sday else 'B'}") for x in subject.times])
     else:
         flash('Class was not found')
         return redirect(url_for('classes', user_code=current_user.user_code))
     times = subject.times
-    return render_template('settimes.html', form=form, times=times, days=CONSTANT_DAYS)
+    return render_template('settimes.html', form=set_times_form, remove_times_form=remove_times_form, times=times, days=CONSTANT_DAYS)
 
 # Route for adding a scanner to a subject/class
 @app.route("/scanner", methods=['GET', 'POST'])

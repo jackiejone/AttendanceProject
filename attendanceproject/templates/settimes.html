@@ -35,4 +35,11 @@
             </li>
         {% endfor %}
     </ul>
+    remove_times_form
+
+    <form action='' method='POST'>
+        {{ remove_times_form.csrf_token }}
+        {{ remove_times_form.time }}
+        {{ remove_times_form.remove }}
+    </form>
 {% endblock %}
