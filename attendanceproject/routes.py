@@ -313,7 +313,7 @@ def check_class_date(student_date, subject):
         for y in subject.times:
             if end_date.isoweekday() == y.sday and AB == y.sweek and end_date == student_date:
                 print(f"{y.sday}, {y.sweek}, {end_date}, {student_date}")
-                return True
+                return y
         if end_date.isoweekday() == 5 and AB == 0:
             AB = 1
         elif end_date.isoweekday() == 5 and AB == 1:
@@ -396,9 +396,14 @@ def class_code(class_code, user_code, day):
 
             if request.method == "POST" and form.validate_on_submit():
                 date = datetime.date(year=datetime.date.today().year, month=form.month.data, day=form.day.data)
-                if check_class_date(date, subject):
-                    None
-
+                subject_datetime = check_class_date(date, subject)
+                if subject_datetime:
+                    new_time = AttendanceTime(time=datetime.datetime(year=date.year, month=date.month, day=date.day, hour=subject_datetime.time.start_time.hour, minute=subject_datetime.time.start_time.minute, second=subject_datetime.time.start_time.second),
+                                              user=user.id, attnd_status=form.status.data, subject=subject.id)
+                    db.session.add(new_time)
+                    db.session.commit()
+                    # Make the function, check_class_date return the datetime 
+                    # TODO: Error handling
                     # TODO: add time and attendance values to the database
                     # TODO: Return values of valid dates into a selectfield for the form
                 else:

@@ -27,7 +27,7 @@ class AttendanceTime(db.Model):
     __tablename__ = "attnd_time"
     
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    time = db.Column(db.DateTime, nullable=True) # DateTime field
+    time = db.Column(db.DateTime, nullable=True)
     user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     attnd_status = db.Column(db.Text(10), nullable=False)
     subject = db.Column(db.Integer, db.ForeignKey('subject_code.id'), nullable=False)
