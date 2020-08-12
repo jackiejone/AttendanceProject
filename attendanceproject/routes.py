@@ -568,11 +568,12 @@ def settimes(class_code):
     # Checking if the class exists
     subject = SubjectCode.query.filter_by(code=class_code).first()
     if subject:
+        form_choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
         set_times_form = SetTimesForm()
         set_times_form.time.choices = get_times()
         remove_times_form = UnsetTimesForm()
-        remove_times_form.time.choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
-        if request.method == 'POST' and set_times_form.validate_on_submit():
+        remove_times_form.time.choices = form_choices
+        if request.method == 'POST' and set_times_form.add.data and set_times_form.validate_on_submit():
             # Checking if the class already has a combination of day, time, and week
             if SubjectTimes.query.filter_by(subject_id=subject.id,
                                             stime_id=set_times_form.time.data,
@@ -583,7 +584,7 @@ def settimes(class_code):
             elif SubjectTimes.query.filter_by(subject_id=subject.id,
                                               sweek=set_times_form.week.data,
                                               sday=set_times_form.day.data).first():
-                flash('This class already has a time of this day')
+                flash('This class already has a time on this day')
             elif len(subject.times) >= 10:
                 flash('Maxmium amount of times of 10 for this classes reached.')
             # Setting the time for the class which the user entered into the form
@@ -594,26 +595,24 @@ def settimes(class_code):
                 db.session.commit()
                 flash('Successfully set time')
                 
-        elif request.method == 'POST' and remove_times_form.validate_on_submit():
+        elif request.method == 'POST' and remove_times_form.remove.data and remove_times_form.validate_on_submit():
             print(remove_times_form.time.data)
-            return 1
+            try:
+                remove_time = SubjectTimes.query.filter_by(id=remove_times_form.time.data).first()
+                db.session.delete(remove_time)
+                db.session.flush()
+            except:
+                flash('Unable to delete time')
+            else:
+                db.session.commit()
         
     else:
         flash('Class was not found')
         return redirect(url_for('classes', user_code=current_user.user_code))
     times = subject.times
-    return render_template('settimes.html', form=set_times_form, remove_times_form=remove_times_form, times=times, days=CONSTANT_DAYS)
-
-@app.route("/removetimes", methods=['POST'])
-@login_required
-def removetimes():
-    form = UnsetTimesForm(request.form)
-    form.time.choices = [(1, 1)]
-    if form.validate_on_submit():
-        print(request.form['time'])
-    else:
-        print('no')
-    return 'yes'
+    form_choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
+    remove_times_form.time.choices = form_choices
+    return render_template('settimes.html', form=set_times_form, remove_times_form=remove_times_form, times=times, days=CONSTANT_DAYS, form_choices=form_choices)
 
 # Route for adding a scanner to a subject/class
 @app.route("/scanner", methods=['GET', 'POST'])
