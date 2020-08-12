@@ -101,6 +101,21 @@ def populate_JoinClassForm(user):
         form.classes.choices = sclasses
     return form
 
+# Function to check if a user is trying to join a class/subject which has conlficting time/s with one of their other classes/subjects
+def check_conflicting_times(user, subject_id):
+    if type(subject_id) != int:
+        subject = SubjectCode.query.filter_by(id=subject_id).first()
+    else:
+        subject = SubjectCode.query.filter_by(join_code=subject_id).first()
+    if not subject.times:
+        return False
+        #TODO: BROKEN
+    for subs in user.subjects:
+        for time in subs.subject.times:
+            for t in subject.times:
+                if time.time == t.time and time.sday == t.sday and time.sweek == t.sweek and subs != subject:
+                    return True
+    return False
 
 # Classes Route TODO: Split up this route
 @app.route('/account/<user_code>/classes', methods=['GET', 'POST'])
@@ -132,6 +147,9 @@ def classes(user_code):
             else:
                 # Adds the user to the classes based on the selected fields from the form
                 for sub_id in formdata:
+                    if check_conflicting_times(user, sub_id):
+                        flash('The class you are trying to join has a conflicting time with one of your other classes')
+                        continue
                     add_user_subject = UserSubject(user_id=user.id, subject_id=sub_id, user_type=user.auth)
                     # Checks if the user is already assocated with the class by
                     # querying the database table with filtered with the user's id and the subject's id
@@ -169,6 +187,10 @@ def classes(user_code):
                 if join_class.id in [x.subject_id for x in current_user.subjects]:
                     flash('You have already joined this class')
                 # Associating the user with the class
+                elif check_conflicting_times(current_user, form.code.data):
+                    flash('The class you are trying to join has a conflicting time with one of your other classes')
+                    user_classes = subject_name(current_user) # Getting a list of the user's subjects/classes
+                    return render_template('my_classes.html', form=form, user=current_user, user_classes=user_classes)
                 else:
                     add_user_subject = UserSubject(user_id=current_user.id,
                                                 subject_id=join_class.id,
@@ -330,7 +352,7 @@ def get_class_dates(subject):
         end_date = start_date + date
         for y in subject.times:
             if end_date.isoweekday() == y.sday and AB == y.sweek:
-                subject_dates.append((end_date, CONSTANT_DAYS[y.sday], 'Week A' if not y.sweek else 'Week B', y.time.start_time))
+                subject_dates.append((end_date.strftime('%d/%m/%y'), CONSTANT_DAYS[y.sday], 'Week A' if not y.sweek else 'Week B', y.time.start_time))
         if end_date.isoweekday() == 5 and AB == 0:
             AB = 1
         elif end_date.isoweekday() == 5 and AB == 1:
@@ -620,7 +642,8 @@ def settimes(class_code):
         return redirect(url_for('classes', user_code=current_user.user_code))
     times = subject.times
     # Updating the select field for the remove_times_form
-    remove_times_form.time.choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
+    form_choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
+    remove_times_form.time.choices = form_choices
     return render_template('settimes.html', form=set_times_form, remove_times_form=remove_times_form, times=times, days=CONSTANT_DAYS, form_choices=form_choices)
 
 # Route for adding a scanner to a subject/class

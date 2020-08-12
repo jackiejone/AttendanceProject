@@ -7,7 +7,7 @@
     {% if subject.times %}
         <ul>
             {% for time in subject.times %}
-                <li>{{ time.time.start_time }} {{ time.time.end_time }} {% if not time.sweek == 0 %} A {% else %} B {% endif %} {{ days[time.sday] }}</li>
+                <li>{{ time.time.start_time }} {{ time.time.end_time }} {% if not time.sweek %} A {% else %} B {% endif %} {{ days[time.sday] }}</li>
             {% endfor %}
         </ul>
     {% endif %}
