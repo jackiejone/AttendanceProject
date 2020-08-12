@@ -550,7 +550,7 @@ def removetime():
             flash('Invalid time')
     return redirect(url_for('addtime'))
 
-
+# Function for getting all the predefined times which a class could be set to
 def get_times():
     times = sorted(Times.query.all(), key=get_start_time)
     return [(time.id, time.start_time) for time in times]
@@ -568,11 +568,14 @@ def settimes(class_code):
     # Checking if the class exists
     subject = SubjectCode.query.filter_by(code=class_code).first()
     if subject:
-        form_choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
         set_times_form = SetTimesForm()
+        # Getting the chocies/values for the selectfield called 'time' in the form for adding times to the subject
         set_times_form.time.choices = get_times()
         remove_times_form = UnsetTimesForm()
-        remove_times_form.time.choices = form_choices
+        # Getting the choices/values for the selectfield called 'time' in the form for removing times frpm the subject
+        remove_times_form.time.choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
+        
+        # validating and processing form the setting the times of a class
         if request.method == 'POST' and set_times_form.add.data and set_times_form.validate_on_submit():
             # Checking if the class already has a combination of day, time, and week
             if SubjectTimes.query.filter_by(subject_id=subject.id,
@@ -594,7 +597,8 @@ def settimes(class_code):
                 subject.times.append(asso)
                 db.session.commit()
                 flash('Successfully set time')
-                
+
+        # Validating and processing form for removing the times of a class
         elif request.method == 'POST' and remove_times_form.remove.data and remove_times_form.validate_on_submit():
             print(remove_times_form.time.data)
             try:
@@ -610,8 +614,8 @@ def settimes(class_code):
         flash('Class was not found')
         return redirect(url_for('classes', user_code=current_user.user_code))
     times = subject.times
-    form_choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
-    remove_times_form.time.choices = form_choices
+    # Updating the select field for the remove_times_form
+    remove_times_form.time.choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
     return render_template('settimes.html', form=set_times_form, remove_times_form=remove_times_form, times=times, days=CONSTANT_DAYS, form_choices=form_choices)
 
 # Route for adding a scanner to a subject/class
@@ -623,13 +627,17 @@ def scanner():
         return redirect(url_for('home'))
     
     add_scanner_form = AddScanner()
+    # Defining the values/choices for the selectfield
     add_scanner_form.subject.choices = [(int(sub.id), sub.code) for sub in SubjectCode.query.all()]
 
+    # Checking if the form is valind the request method was a POST
     if request.method == 'POST' and add_scanner_form.validate_on_submit():
         scan_id = add_scanner_form.scanner.data.strip().lower()
+        # Checking if a particular subject already has a scanner associated to it. One subject can only have one scanner but one scanner can have multiple subjects
         if Scanner.query.filter_by(subject_id=add_scanner_form.subject.data).first():
             flash('Subject already has an associated scanner')
         else:
+            # Adding the scanner and subject association to the database
             try:
                 new_scanner = Scanner(scanner_id=scan_id, subject_id=add_scanner_form.subject.data)
                 db.session.add(new_scanner)
