@@ -107,13 +107,12 @@ def check_conflicting_times(user, subject_id):
         subject = SubjectCode.query.filter_by(id=subject_id).first()
     else:
         subject = SubjectCode.query.filter_by(join_code=subject_id).first()
+    
     if not subject.times:
         return False
-    for subs in user.subjects:
-        for time in subs.subject.times:
-            for t in subject.times:
-                if time.time == t.time and time.sday == t.sday and time.sweek == t.sweek and subs != subject:
-                    return True
+    for times in subject.times:
+        if len(SubjectTimes.query.filter_by(stime_id=times.stime_id, sweek=times.sweek, sday=times.sday).all()) > 1:
+            return True
     return False
 
 # Classes Route
