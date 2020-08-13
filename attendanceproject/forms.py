@@ -129,6 +129,6 @@ class AddScanner(FlaskForm):
 class AddStudentAttndTime(FlaskForm):
     day = SelectField("Day", choices=[(x , x) for x in range(1, 32)], coerce=int)
     month = SelectField("Month", choices=[(x, x) for x in range(1, 13)], coerce=int)
-    status = SelectField('Attendance Status', choices=[(0, 'Present'), (1, 'Late'), (2, 'Absent')], coerce=int, validators=[InputRequired()])
+    status = SelectField('Attendance Status', choices=[('present', 'Present'), ('late', 'Late'), ('absent', 'Absent')], coerce=str, validators=[InputRequired()])
     submit = SubmitField('Submit')
     

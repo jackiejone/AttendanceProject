@@ -326,9 +326,7 @@ def std_attnd(student, subject):
 
 # This function checks if the a subject is on a particular date
 def check_class_date(student_date, subject):
-    subject_dates = []
     AB = 0
-    x = 0
     for i in range(1, 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
@@ -421,14 +419,33 @@ def class_code(class_code, user_code, day):
                 date = datetime.date(year=datetime.date.today().year, month=form.month.data, day=form.day.data)
                 subject_datetime = check_class_date(date, subject)
                 if subject_datetime:
-                    new_time = AttendanceTime(time=datetime.datetime(year=date.year, month=date.month, day=date.day, hour=subject_datetime.time.start_time.hour, minute=subject_datetime.time.start_time.minute, second=subject_datetime.time.start_time.second),
-                                              user=user.id, attnd_status=form.status.data, subject=subject.id)
-                    db.session.add(new_time)
-                    db.session.commit()
-                    # Make the function, check_class_date return the datetime 
-                    # TODO: Error handling
-                    # TODO: add time and attendance values to the database
-                    # TODO: Return values of valid dates into a selectfield for the form
+                    duplicate_attendance_time = AttendanceTime.query.filter_by(time=datetime.datetime(year=date.year, month=date.month, day=date.day, hour=subject_datetime.time.start_time.hour, minute=subject_datetime.time.start_time.minute, second=subject_datetime.time.start_time.second),
+                                              user=user.id, subject=subject.id).first()
+                    print(duplicate_attendance_time)
+                    if duplicate_attendance_time:
+                        if duplicate_attendance_time.attnd_status != form.status.data:
+                            duplicate_attendance_time.attnd_status = form.status.data
+                            try:
+                                db.session.flush()
+                            except:
+                                db.session.rollback()
+                                flash('Something went wrong, attendance status was not updated')
+                            else:
+                                db.session.commit()
+                                flash('Successfully updated attendance for this date')
+                        else:
+                            flash('No Update')
+                    else:
+                        try:
+                            new_time = AttendanceTime(time=datetime.datetime(year=date.year, month=date.month, day=date.day, hour=subject_datetime.time.start_time.hour, minute=subject_datetime.time.start_time.minute, second=subject_datetime.time.start_time.second),
+                                                    user=user.id, attnd_status=form.status.data, subject=subject.id)
+                            db.session.add(new_time)
+                            db.session.flush()
+                        except:
+                            db.session.rollback()
+                        else:
+                            db.session.commit()
+                            flash('Successfully added new attendance to the database')
                 else:
                     flash('Date was not a valid date for the subject')
             class_times = get_class_dates(subject)
@@ -628,12 +645,12 @@ def settimes(class_code):
 
         # Validating and processing form for removing the times of a class
         elif request.method == 'POST' and remove_times_form.remove.data and remove_times_form.validate_on_submit():
-            print(remove_times_form.time.data)
             try:
                 remove_time = SubjectTimes.query.filter_by(id=remove_times_form.time.data).first()
                 db.session.delete(remove_time)
                 db.session.flush()
             except:
+                db.session.rollback()
                 flash('Unable to delete time')
             else:
                 db.session.commit()
