@@ -103,13 +103,12 @@ def populate_JoinClassForm(user):
 
 # Function to check if a user is trying to join a class/subject which has conlficting time/s with one of their other classes/subjects
 def check_conflicting_times(user, subject_id):
-    if type(subject_id) != int:
+    if type(subject_id) == int:
         subject = SubjectCode.query.filter_by(id=subject_id).first()
     else:
         subject = SubjectCode.query.filter_by(join_code=subject_id).first()
     if not subject.times:
         return False
-        #TODO: BROKEN
     for subs in user.subjects:
         for time in subs.subject.times:
             for t in subject.times:
@@ -117,7 +116,7 @@ def check_conflicting_times(user, subject_id):
                     return True
     return False
 
-# Classes Route TODO: Split up this route
+# Classes Route
 @app.route('/account/<user_code>/classes', methods=['GET', 'POST'])
 @login_required
 def classes(user_code):
@@ -146,9 +145,12 @@ def classes(user_code):
                 return render_template('my_classes.html', form=form, formdata=None, user=user, user_classes=user_classes)
             else:
                 # Adds the user to the classes based on the selected fields from the form
+                conflict_check = False
                 for sub_id in formdata:
                     if check_conflicting_times(user, sub_id):
-                        flash('The class you are trying to join has a conflicting time with one of your other classes')
+                        if not conflict_check:
+                            flash('The class you are trying to join has a conflicting time with one of your other classes')
+                            conflict_check = True
                         continue
                     add_user_subject = UserSubject(user_id=user.id, subject_id=sub_id, user_type=user.auth)
                     # Checks if the user is already assocated with the class by
