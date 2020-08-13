@@ -1,3 +1,3 @@
-x = ['a', 'b', 'c']
-y = list(enumerate(x))
-print(y)
+x = ('a', 'b', 'c')
+x = list(x)
+print(x)

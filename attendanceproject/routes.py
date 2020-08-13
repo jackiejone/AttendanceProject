@@ -374,6 +374,10 @@ def day_num(_date=datetime.date.today()):
             return i
 
 # Route for viewing a subject/class for a specific user as a specfic user
+# This route is split up into three main sections for handling 3 different situations
+# The first situation is when a teacher is viewing one of their own classes/subjects
+# The second situation is when a teacher is viewing a class with the data of a particular student
+# The last siutation is when a student is viewing one of their classes
 @app.route('/account/<user_code>/classes/<class_code>/<day>', defaults={'day': day_num()}, methods=["GET", "POST"])
 @login_required
 def class_code(class_code, user_code, day):
@@ -386,7 +390,6 @@ def class_code(class_code, user_code, day):
         # For this one, show the attendane of each student in the class on a certain day
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]) and user == current_user:
-            c_code = class_code
 
             # Getting the date of which the user is viewing via the "day" parameter in the link
             total_days = day - day_num()
@@ -434,7 +437,7 @@ def class_code(class_code, user_code, day):
                                 db.session.commit()
                                 flash('Successfully updated attendance for this date')
                         else:
-                            flash('No Update')
+                            flash('Attendance was not updated')
                     else:
                         try:
                             new_time = AttendanceTime(time=datetime.datetime(year=date.year, month=date.month, day=date.day, hour=subject_datetime.time.start_time.hour, minute=subject_datetime.time.start_time.minute, second=subject_datetime.time.start_time.second),
@@ -477,7 +480,6 @@ def test():
 # Route for logging attendance using a post reqeust from an external http client
 @app.route('/logtime', methods=['POST'])
 def logtime():
-
     try:
         user_code = request.form['user']
         card_uid = request.form['card_uid']
@@ -486,8 +488,8 @@ def logtime():
         print("Failed to obtain values")
         return "Error"
     else:
-        user = User.query.filter_by(user_code=user_id).first()
-        current_datetime = datetime.now()
+        user = User.query.filter_by(user_code=user_code).first()
+        current_datetime = datetime.datetime.now()
 
         if not user:
             return "User not found"
@@ -520,7 +522,7 @@ def logtime():
                             return 'An Error Occured'
                         else:
                             return 'Success'
-    return user_id, uid
+    return user_code
 
 
 
@@ -663,6 +665,13 @@ def settimes(class_code):
     form_choices = [(x.id, f"{x.time.start_time} {'Week A' if not x.sweek else 'Week B'} {CONSTANT_DAYS[x.sday]}") for x in subject.times]
     remove_times_form.time.choices = form_choices
     return render_template('settimes.html', form=set_times_form, remove_times_form=remove_times_form, times=times, days=CONSTANT_DAYS, form_choices=form_choices)
+
+# Route for viewing all the students in the system
+@app.route('/students', methods=['GET'])
+@login_required
+def students():
+    User.query.filter_by(auth='student').all()
+    return render_template('students.html')
 
 # Route for adding a scanner to a subject/class
 @app.route("/scanner", methods=['GET', 'POST'])
