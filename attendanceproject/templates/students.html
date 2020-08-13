@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>My Students</h1>
+    {% if my_students %}
+        <ul>
+            {% for student in my_students %}
+                <a href="{{ url_for('classes', user_code=student.user_code) }}"><li>{{ student.fname}} {{ student.lname }}</li></a>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no students</p>
+    {% endif %}
+
+    <h1>All Students</h1>
+    {% if students %}
+        <ul>
+            {% for student in students %}
+            <a href="{{ url_for('classes', user_code=student.user_code) }}"><li>{{ student.fname }} {{ student.lname }}</li></a>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no students</p>
+    {% endif %}
+{% endblock %}

@@ -670,9 +670,17 @@ def settimes(class_code):
 @app.route('/students', methods=['GET'])
 @login_required
 def students():
-    User.query.filter_by(auth='student').all()
-    return render_template('students.html')
-
+    if current_user.auth == 'teacher':
+        students = User.query.filter_by(auth='student').all()
+        my_students = []
+        for subject in current_user.subjects:
+            for user in subject.subject.users:
+                if user.user.auth != 'teacher' and user.user not in my_students:
+                    my_students.append(user.user)
+        return render_template('students.html', students=students, my_students=my_students)
+    else:
+        flash('You do not have access to this page')
+        return redirect(url_for('home'))
 # Route for adding a scanner to a subject/class
 @app.route("/scanner", methods=['GET', 'POST'])
 @login_required
