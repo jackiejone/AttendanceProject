@@ -297,33 +297,6 @@ def view_subject(subject):
         flash('Class could not be found')
         return redirect(url_for('all_classes'))
 
-# TODO: Implement way of adding times to the database
-def std_attnd(student, subject):
-    """
-    weeks = []
-    AB = 'A'
-    x = 0
-    week_num = 1
-    for i in range(1, 366):
-        date = datetime.timedelta(days=i)
-        start_date = datetime.date(2019, 12, 31)
-        end_date = start_date + date
-        if end_date.isoweekday() in [1, 2, 3, 4, 5]:
-            if subject.id in [s.subject for s in student.attnd_times]:
-                weeks.append((AB, week_num, end_date, [d for d in subject.times.time if d.time.start_time], [s.attnd_status for s in student.attnd_times if student.attnd_times.time.date() == end_date]))
-            else:
-                weeks.append((AB, week_num, end_date, [d.time.start_time for d in subject.times if d.sweek==x and d.sday==end_date.isoweekday()], "N/A"))
-            if end_date.isoweekday() == 5 and AB == 'A':
-                AB = 'B'
-                week_num += 1
-            elif end_date.isoweekday() == 5 and AB == 'B':
-                AB = 'A'
-                week_num += 1
-    """
-    weeks = [(x.time, x.attnd_status) for x in student.attnd_times if x.subject == subject.id]
-
-    return weeks
-
 # This function checks if the a subject is on a particular date
 def check_class_date(subject_date, subject):
     AB = 0
@@ -334,10 +307,7 @@ def check_class_date(subject_date, subject):
         for y in subject.times:
             if end_date.isoweekday()-1 == y.sday and AB == y.sweek and end_date == subject_date:
                 return {'subject':y, 'day':y.sday, 'week':y.sweek} 
-        if end_date.isoweekday() == 4 and AB == 0:
-            AB = 1
-        elif end_date.isoweekday() == 4 and AB == 1:
-            AB = 0
+        AB = not AB if end_date.isoweekday() == 5 else AB
     return False
 
 # Function to get all the dates which a class/subject lands on
@@ -351,20 +321,11 @@ def get_class_dates(subject):
         for y in subject.times:
             if end_date.isoweekday()-1 == y.sday and AB == y.sweek:
                 subject_dates.append((end_date.strftime('%d/%m/%y'), CONSTANT_DAYS[y.sday], 'Week A' if not y.sweek else 'Week B', y.time.start_time))
-        if end_date.isoweekday() == 4 and AB == 0:
-            AB = 1
-        elif end_date.isoweekday() == 4 and AB == 1:
-            AB = 0
+        AB = not AB if end_date.isoweekday() == 5 else AB
     return subject_dates
-
-    # TODO: This function checks the user's login times against the subjects predefined times but you want the predefines times to be
-    # checked against the user's login times so you can add an if statement to see if there was no class on that day. You also need to implement
-    # the days of the subject's predefined times into this so it actually works
-    # You also need to do some time math here concering the week in comparison to the days of the year
-    # What
  
  # This function returns the nth day of the year
-def day_num(_date=datetime.date.today()):
+def day_num():
     for i in range(1, 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
@@ -392,9 +353,10 @@ def class_code(class_code, user_code, day):
 
             # Getting the date of which the user is viewing via the "day" parameter in the link
             total_days = day - day_num()
-            current_date = (datetime.date.today() - datetime.timedelta(days=total_days)).strftime('%d/%m/%y')
-            check = check_class_date(subject_date=datetime.date.today() - datetime.timedelta(days=total_days), subject=subject)
-            print(check)
+            print(total_days)
+            current_date = datetime.date.today() - datetime.timedelta(days=total_days)
+            print(current_date)
+            check = check_class_date(subject_date=current_date - datetime.timedelta(days=total_days), subject=subject)
             student_times = [] # Variable for the times of the students in the class
             students_in_class = 0 # Variable used to check if there are students in the class
             if 'student' in [user.user_type for user in subject.users]:
@@ -403,7 +365,6 @@ def class_code(class_code, user_code, day):
                 for user in subject.users:
                     added_time = False
                     if user.user_type == 'student':
-                        print(user)
                         if user.user.attnd_times:
                             for t in user.user.attnd_times:
                                 if t.time.date == current_date and t.subject == subject.id:
@@ -415,13 +376,12 @@ def class_code(class_code, user_code, day):
                         else:
                             student_times.append((user.user, "N/A"))
             if not check:
-                return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=None, student_times=None)
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date, student_times=student_times, time=check)
+                return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None)
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check)
             
         # User is a teacher viewing the class of a student
         # For this one, show the attendance of the student and be able to change attendnance
         elif current_user.auth == 'teacher' and user.auth == 'student':
-            times = std_attnd(current_user, subject)
             form = AddStudentAttndTime()
 
             if request.method == "POST" and form.validate_on_submit():
