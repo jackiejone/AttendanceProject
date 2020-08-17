@@ -332,11 +332,11 @@ def check_class_date(subject_date, subject):
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
         for y in subject.times:
-            if end_date.isoweekday() == y.sday and AB == y.sweek and end_date == subject_date:
+            if end_date.isoweekday()-1 == y.sday and AB == y.sweek and end_date == subject_date:
                 return {'subject':y, 'day':y.sday, 'week':y.sweek} 
-        if end_date.isoweekday() == 5 and AB == 0:
+        if end_date.isoweekday() == 4 and AB == 0:
             AB = 1
-        elif end_date.isoweekday() == 5 and AB == 1:
+        elif end_date.isoweekday() == 4 and AB == 1:
             AB = 0
     return False
 
@@ -349,11 +349,11 @@ def get_class_dates(subject):
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
         for y in subject.times:
-            if end_date.isoweekday() == y.sday and AB == y.sweek:
+            if end_date.isoweekday()-1 == y.sday and AB == y.sweek:
                 subject_dates.append((end_date.strftime('%d/%m/%y'), CONSTANT_DAYS[y.sday], 'Week A' if not y.sweek else 'Week B', y.time.start_time))
-        if end_date.isoweekday() == 5 and AB == 0:
+        if end_date.isoweekday() == 4 and AB == 0:
             AB = 1
-        elif end_date.isoweekday() == 5 and AB == 1:
+        elif end_date.isoweekday() == 4 and AB == 1:
             AB = 0
     return subject_dates
 
@@ -394,25 +394,29 @@ def class_code(class_code, user_code, day):
             total_days = day - day_num()
             current_date = (datetime.date.today() - datetime.timedelta(days=total_days)).strftime('%d/%m/%y')
             check = check_class_date(subject_date=datetime.date.today() - datetime.timedelta(days=total_days), subject=subject)
+            print(check)
+            student_times = [] # Variable for the times of the students in the class
+            students_in_class = 0 # Variable used to check if there are students in the class
+            if 'student' in [user.user_type for user in subject.users]:
+                students_in_class = 1
+                # Getting the attendance status of each student in the class for a specific date
+                for user in subject.users:
+                    added_time = False
+                    if user.user_type == 'student':
+                        print(user)
+                        if user.user.attnd_times:
+                            for t in user.user.attnd_times:
+                                if t.time.date == current_date and t.subject == subject.id:
+                                    student_times.append((user.user, t.attnd_status))
+                                    added_time = True
+                                    break
+                            if not added_time:
+                                student_times.append((user.user, "N/A"))
+                        else:
+                            student_times.append((user.user, "N/A"))
             if not check:
                 return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=None, student_times=None)
-            else:
-                student_times = [] # Variable for the times of the students in the class
-                students_in_class = 0 # Variable used to check if there are students in the class
-                if 'student' in [user.user_type for user in subject.users]:
-                    students_in_class = 1
-                    # Getting the attendance status of each student in the class for a specific date
-                    for user in subject.users:
-                        if user.user_type == 'student':
-                            if user.user.attnd_times:
-                                for t in user.user.attnd_times:
-                                    if t.time.date == current_date:
-                                        student_times.append((user.user, t.attnd_status))
-                                    else:
-                                        student_times.append((user.user, "N/A"))
-                            else:
-                                student_times.append((user.user, "N/A"))
-                return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date, student_times=student_times, time=check)
+            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date, student_times=student_times, time=check)
             
         # User is a teacher viewing the class of a student
         # For this one, show the attendance of the student and be able to change attendnance
