@@ -681,6 +681,7 @@ def students():
     else:
         flash('You do not have access to this page')
         return redirect(url_for('home'))
+
 # Route for adding a scanner to a subject/class
 @app.route("/scanner", methods=['GET', 'POST'])
 @login_required
@@ -722,4 +723,9 @@ def error404(e):
 @app.errorhandler(405)
 def error405(e):
     flash('Invalid Request Method')
+    return redirect(url_for('home'))
+
+@app.errorhandler(500)
+def error500(e):
+    flash('An error occured on our side')
     return redirect(url_for('home'))
