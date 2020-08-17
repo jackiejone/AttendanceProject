@@ -25,12 +25,19 @@
         <p>No students in this class</p>
     {% endif %}
     
-    <h2>Attendance for {{ current_date }}</h2>
+    {% if current_date %}
+    <h2>Attendance for {{ current_date }} {{ time['subject'].time.start_time }} - {{ time['subject'].time.end_time }}</h2>
     <ul>
-        {% for i in student_times %}
-            <li>Student: <div class='capatalize'><a href="{{ url_for('class_code', user_code=i[0].user_code, class_code=subject.code) }}">{{ i[0].fname }}</a></div> Status: <div class='capatalize'>{{ i[1] }}</div></li>
-        {% endfor %}
+        {% if student_times }
+            {% for i in student_times %}
+                <li>Student: <div class='capatalize'><a href="{{ url_for('class_code', user_code=i[0].user_code, class_code=subject.code) }}">{{ i[0].fname }}</a></div> Status: <div class='capatalize'>{{ i[1] }}</div></li>
+            {% endfor %}
+        {% endif %}
     </ul>
+    {% else %}
+        <p>There is no class today</p>
+    {% endif %}
+
     </br>
     <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
 {% endblock %}

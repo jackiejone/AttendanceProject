@@ -1,3 +1,2 @@
-x = ('a', 'b', 'c')
-x = list(x)
-print(x)
+dictionary = {'a':5, 'b':6}
+print(dictionary['a'])
