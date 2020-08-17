@@ -17,7 +17,7 @@
         <ul>
         {% for user in subject.users %}
             {% if user.user_type == 'student'%}
-                <a href="{{ url_for('class_code', user_code=user.user.user_code, class_code=subject.code) }}"><li>{{ user.user.fname }}</li></a>
+                <a href="{{ url_for('class_code', user_code=user.user.user_code, class_code=subject.code, day=day_num) }}"><li>{{ user.user.fname }}</li></a>
             {% endif %}
         {% endfor %}
         </ul>
@@ -25,12 +25,12 @@
         <p>No students in this class</p>
     {% endif %}
     
-    {% if current_date %}
+    {% if current_date and student_times%}
     <h2>Attendance for {{ current_date }} {{ time['subject'].time.start_time }} - {{ time['subject'].time.end_time }}</h2>
     <ul>
         {% if student_times %}
             {% for i in student_times %}
-                <li>Student: <div class='capatalize'><a href="{{ url_for('class_code', user_code=i[0].user_code, class_code=subject.code) }}">{{ i[0].fname }}</a></div> Status: <div class='capatalize'>{{ i[1] }}</div></li>
+                <li>Student: <div class='capatalize'><a href="{{ url_for('class_code', user_code=i[0].user_code, class_code=subject.code, day=day_num) }}">{{ i[0].fname }}</a></div> Status: <div class='capatalize'>{{ i[1] }}</div></li>
             {% endfor %}
         {% endif %}
     </ul>
