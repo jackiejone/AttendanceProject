@@ -111,8 +111,12 @@ def check_conflicting_times(user, subject_id):
     if not subject.times:
         return False
     for times in subject.times:
-        if len(SubjectTimes.query.filter_by(stime_id=times.stime_id, sweek=times.sweek, sday=times.sday).all()) > 1:
-            return True
+        sub_times = SubjectTimes.query.filter_by(stime_id=times.stime_id, sweek=times.sweek, sday=times.sday).all()
+        if len(sub_times) > 1:
+            for i in sub_times:
+                for x in i.subject.users:
+                    if user.id == x.user_id:
+                        return True
     return False
 
 # Classes Route
