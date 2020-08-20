@@ -25,7 +25,7 @@
         <p>No students in this class</p>
     {% endif %}
     
-    <h3>Currently Week {{ week }}</h3>
+    <h3>Currently Week {{ week }} {{ day }}</h3>
     {% if current_date and student_times%}
     <h2>Attendance for {{ current_date }} {{ time['subject'].time.start_time }} - {{ time['subject'].time.end_time }}</h2>
     <ul>
