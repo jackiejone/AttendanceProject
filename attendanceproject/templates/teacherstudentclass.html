@@ -44,10 +44,10 @@
         {{ form.submit }}
     </form>
 
-    {% if times %}
+    {% if student_times %}
         <ul>
             {% for time in student_times %}
-                <li>{{ time }}</li>
+                <li>{% for i in time %} {{ i }} {% endfor %}</li>
             {% endfor %}
         </ul>
     {% endif %}

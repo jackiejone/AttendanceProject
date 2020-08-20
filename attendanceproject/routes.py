@@ -119,6 +119,15 @@ def check_conflicting_times(user, subject_id):
                         return True
     return False
 
+ # This function returns the nth day of the year
+def day_num():
+    for i in range(1, 366):
+        date = datetime.timedelta(days=i)
+        start_date = datetime.date(2019, 12, 31)
+        end_date = start_date + date
+        if end_date == datetime.date.today():
+            return i
+
 # Classes Route
 @app.route('/account/<user_code>/classes', methods=['GET', 'POST'])
 @login_required
@@ -173,7 +182,7 @@ def classes(user_code):
                             user = User.query.filter_by(user_code=user_code).first()
                             form = populate_JoinClassForm(user)
         user_classes = subject_name(user) # Getting a list of the user's subjects/classes
-        return render_template('my_classes.html', form=form, user=user, user_classes=user_classes)
+        return render_template('my_classes.html', form=form, user=user, user_classes=user_classes, day_num=day_num())
 
     else: # If the current user is not a teacher 
         if user_code != current_user.user_code:
@@ -328,21 +337,13 @@ def get_class_dates(subject):
         AB = not AB if end_date.isoweekday() == 5 else AB
     return subject_dates
  
- # This function returns the nth day of the year
-def day_num():
-    for i in range(1, 366):
-        date = datetime.timedelta(days=i)
-        start_date = datetime.date(2019, 12, 31)
-        end_date = start_date + date
-        if end_date == datetime.date.today():
-            return i
 
 # Route for viewing a subject/class for a specific user as a specfic user
 # This route is split up into three main sections for handling 3 different situations
 # The first situation is when a teacher is viewing one of their own classes/subjects
 # The second situation is when a teacher is viewing a class with the data of a particular student
 # The last siutation is when a student is viewing one of their classes
-@app.route('/account/<user_code>/classes/<class_code>/<day>', defaults={'day': day_num()}, methods=["GET", "POST"])
+@app.route('/account/<user_code>/classes/<class_code>/<int:day>', methods=["GET", "POST"])
 @login_required
 def class_code(class_code, user_code, day):
     subject = SubjectCode.query.filter_by(code=class_code).first()
@@ -357,9 +358,7 @@ def class_code(class_code, user_code, day):
 
             # Getting the date of which the user is viewing via the "day" parameter in the link
             total_days = day - day_num()
-            print(total_days)
             current_date = datetime.date.today() - datetime.timedelta(days=total_days)
-            print(current_date)
             check = check_class_date(subject_date=current_date - datetime.timedelta(days=total_days), subject=subject)
             student_times = [] # Variable for the times of the students in the class
             students_in_class = 0 # Variable used to check if there are students in the class
@@ -380,8 +379,8 @@ def class_code(class_code, user_code, day):
                         else:
                             student_times.append((user.user, "N/A"))
             if not check:
-                return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None)
-            return render_template("teacherclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check)
+                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None)
+            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check)
             
         # User is a teacher viewing the class of a student
         # For this one, show the attendance of the student and be able to change attendnance
@@ -427,7 +426,10 @@ def class_code(class_code, user_code, day):
                             flash('Successfully added new attendance to the database')
                 else:
                     flash('Date was not a valid date for the subject')
-            class_times = get_class_dates(subject)
+            class_times = get_class_dates(subject) 
+            #user = User.query.filter_by(user_code=user_code).first()
+            times = [(x.time, x.attnd_status) for x in user.attnd_times if x.subject == subject.id] # Gets the all the attendance times and dates of a parcitular student for a  subject
+            print(times)
             return render_template("teacherstudentclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, student_times=times, form=form, class_times=class_times)
         
         # User is a student and they're viewing their class
@@ -657,6 +659,7 @@ def students():
     else:
         flash('You do not have access to this page')
         return redirect(url_for('home'))
+
 # Route for adding a scanner to a subject/class
 @app.route("/scanner", methods=['GET', 'POST'])
 @login_required
@@ -698,4 +701,9 @@ def error404(e):
 @app.errorhandler(405)
 def error405(e):
     flash('Invalid Request Method')
+    return redirect(url_for('home'))
+
+@app.errorhandler(500)
+def error500(e):
+    flash('An error occured on our side')
     return redirect(url_for('home'))
