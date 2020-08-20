@@ -319,6 +319,7 @@ def check_class_date(subject_date, subject):
         end_date = start_date + date
         for y in subject.times:
             if end_date.isoweekday()-1 == y.sday and AB == y.sweek and end_date == subject_date:
+                print(end_date.isoweekday(), y.sday)
                 return {'subject':y, 'day':y.sday, 'week':y.sweek} 
         AB = not AB if end_date.isoweekday() == 5 else AB
     return False
@@ -345,7 +346,7 @@ def current_week(viewing_date=datetime.date.today()):
         end_date = start_date + date
         if end_date == viewing_date:
             return 'A' if not week else 'B'
-        if end_date.isoweekday() == 5:
+        if end_date.isoweekday() == 7:
             week = not week
 
 # Route for viewing a subject/class for a specific user as a specfic user
@@ -362,14 +363,14 @@ def class_code(class_code, user_code, day):
         return redirect(url_for('classes', user_code=current_user.user_code))
     user = User.query.filter_by(user_code=user_code).first()
     if user:
+        total_days = day_num() - day
+        current_date = datetime.date.today() - datetime.timedelta(days=total_days)
         # For this one, show the attendane of each student in the class on a certain day
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]) and user == current_user:
 
             # Getting the date of which the user is viewing via the "day" parameter in the link
-            total_days = day - day_num()
-            current_date = datetime.date.today() - datetime.timedelta(days=total_days)
-            check = check_class_date(subject_date=current_date - datetime.timedelta(days=total_days), subject=subject)
+            check = check_class_date(subject_date=current_date, subject=subject)
             student_times = [] # Variable for the times of the students in the class
             students_in_class = 0 # Variable used to check if there are students in the class
             if 'student' in [user.user_type for user in subject.users]:
@@ -388,9 +389,10 @@ def class_code(class_code, user_code, day):
                                 student_times.append((user.user, "N/A"))
                         else:
                             student_times.append((user.user, "N/A"))
-            if not check:
-                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None, week=current_week(current_date))
-            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check, week=current_week(current_date))
+            if check:
+                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check, week=current_week(current_date))
+            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None, week=current_week(current_date))
+            
             
         # User is a teacher viewing the class of a student
         # For this one, show the attendance of the student and be able to change attendnance
