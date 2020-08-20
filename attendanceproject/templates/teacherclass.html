@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>Viewing <div class='name'>{{ subject.name }}</div> as <div class='name'>{{ user.fname }} {{ user.lname }}</div></h1>
-
+    <a href="{{ prev_next['prev_day'] }}">Prevous Day</a><a href="{{ prev_next['next_day'] }}">Next Day</a>
     <!-- Displaying all the users in the class if the user viewing the class is a teacher -->
     <h2>Times</h2>
     {% if subject.times %}

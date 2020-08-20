@@ -358,6 +358,8 @@ def current_week(viewing_date=datetime.date.today()):
 @login_required
 def class_code(class_code, user_code, day):
     subject = SubjectCode.query.filter_by(code=class_code).first()
+    prev_next = {'next_day':url_for('class_code', class_code=class_code, user_code=user_code, day=day+1),
+                 'prev_day':url_for('class_code', class_code=class_code, user_code=user_code, day=day-1)}
     if not subject:
         flash('Class could not be found')
         return redirect(url_for('classes', user_code=current_user.user_code))
@@ -390,8 +392,8 @@ def class_code(class_code, user_code, day):
                         else:
                             student_times.append((user.user, "N/A"))
             if check:
-                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1])
-            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1])
+                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next)
+            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next)
             
             
         # User is a teacher viewing the class of a student
