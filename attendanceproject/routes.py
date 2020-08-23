@@ -456,7 +456,7 @@ def test():
 def logtime():
     try:
         user_code = request.form['user']
-        card_uid = request.form['card_uid']
+        card_uid = request.form['uid']
         scanner_id = request.form['scanner_id']
     except:
         print("Failed to obtain values")
