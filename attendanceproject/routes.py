@@ -12,7 +12,7 @@ from random import choice
 import datetime
 
 
-CONSTANT_DAYS = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday') 
+CONSTANT_DAYS = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') 
 
 # Home Route
 @app.route('/', methods=["GET"])
@@ -111,8 +111,12 @@ def check_conflicting_times(user, subject_id):
     if not subject.times:
         return False
     for times in subject.times:
-        if len(SubjectTimes.query.filter_by(stime_id=times.stime_id, sweek=times.sweek, sday=times.sday).all()) > 1:
-            return True
+        sub_times = SubjectTimes.query.filter_by(stime_id=times.stime_id, sweek=times.sweek, sday=times.sday).all()
+        if len(sub_times) > 1:
+            for i in sub_times:
+                for x in i.subject.users:
+                    if user.id == x.user_id:
+                        return True
     return False
 
  # This function returns the nth day of the year
@@ -200,7 +204,7 @@ def classes(user_code):
                 elif check_conflicting_times(current_user, form.code.data):
                     flash('The class you are trying to join has a conflicting time with one of your other classes')
                     user_classes = subject_name(current_user) # Getting a list of the user's subjects/classes
-                    return render_template('my_classes.html', form=form, user=current_user, user_classes=user_classes)
+                    return render_template('my_classes.html', form=form, user=current_user, user_classes=user_classes, day_num=day_num())
                 else:
                     add_user_subject = UserSubject(user_id=current_user.id,
                                                 subject_id=join_class.id,
@@ -216,7 +220,7 @@ def classes(user_code):
             else:
                 flash('Invalid Join Code')
         user_classes = subject_name(current_user) # Getting a list of the user's subjects/classes
-        return render_template('my_classes.html', form=form, user=current_user, user_classes=user_classes)
+        return render_template('my_classes.html', form=form, user=current_user, user_classes=user_classes, day_num=day_num())
 
 # Function to create unique alphanumeric codes
 def generate_code():
@@ -315,6 +319,7 @@ def check_class_date(subject_date, subject):
         end_date = start_date + date
         for y in subject.times:
             if end_date.isoweekday()-1 == y.sday and AB == y.sweek and end_date == subject_date:
+                print(end_date.isoweekday(), y.sday)
                 return {'subject':y, 'day':y.sday, 'week':y.sweek} 
         AB = not AB if end_date.isoweekday() == 5 else AB
     return False
@@ -333,6 +338,16 @@ def get_class_dates(subject):
         AB = not AB if end_date.isoweekday() == 5 else AB
     return subject_dates
  
+def current_week(viewing_date=datetime.date.today()):
+    week = 0
+    for i in range (1, 366):
+        date = datetime.timedelta(days=i)
+        start_date = datetime.date(2019, 12, 31)
+        end_date = start_date + date
+        if end_date == viewing_date:
+            return 'A' if not week else 'B'
+        if end_date.isoweekday() == 7:
+            week = not week
 
 # Route for viewing a subject/class for a specific user as a specfic user
 # This route is split up into three main sections for handling 3 different situations
@@ -343,19 +358,21 @@ def get_class_dates(subject):
 @login_required
 def class_code(class_code, user_code, day):
     subject = SubjectCode.query.filter_by(code=class_code).first()
+    prev_next = {'next_day':url_for('class_code', class_code=class_code, user_code=user_code, day=day+1),
+                 'prev_day':url_for('class_code', class_code=class_code, user_code=user_code, day=day-1)}
     if not subject:
         flash('Class could not be found')
         return redirect(url_for('classes', user_code=current_user.user_code))
     user = User.query.filter_by(user_code=user_code).first()
     if user:
+        total_days = day_num() - day
+        current_date = datetime.date.today() - datetime.timedelta(days=total_days)
         # For this one, show the attendane of each student in the class on a certain day
         if (current_user.auth == 'teacher' and class_code in
             [x.subject.code for x in current_user.subjects]) and user == current_user:
 
             # Getting the date of which the user is viewing via the "day" parameter in the link
-            total_days = day - day_num()
-            current_date = datetime.date.today() - datetime.timedelta(days=total_days)
-            check = check_class_date(subject_date=current_date - datetime.timedelta(days=total_days), subject=subject)
+            check = check_class_date(subject_date=current_date, subject=subject)
             student_times = [] # Variable for the times of the students in the class
             students_in_class = 0 # Variable used to check if there are students in the class
             if 'student' in [user.user_type for user in subject.users]:
@@ -366,7 +383,7 @@ def class_code(class_code, user_code, day):
                     if user.user_type == 'student':
                         if user.user.attnd_times:
                             for t in user.user.attnd_times:
-                                if t.time.date == current_date and t.subject == subject.id:
+                                if t.time.date() == current_date and t.subject == subject.id:
                                     student_times.append((user.user, t.attnd_status))
                                     added_time = True
                                     break
@@ -374,9 +391,10 @@ def class_code(class_code, user_code, day):
                                 student_times.append((user.user, "N/A"))
                         else:
                             student_times.append((user.user, "N/A"))
-            if not check:
-                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None)
-            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check)
+            if check:
+                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next)
+            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next)
+            
             
         # User is a teacher viewing the class of a student
         # For this one, show the attendance of the student and be able to change attendnance
