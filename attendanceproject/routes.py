@@ -121,7 +121,7 @@ def check_conflicting_times(user, subject_id):
 
  # This function returns the nth day of the year
 def day_num():
-    for i in range(1, 366):
+    for i in range(0, 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
@@ -313,7 +313,7 @@ def view_subject(subject):
 # This function checks if the a subject is on a particular date
 def check_class_date(subject_date, subject):
     AB = 0
-    for i in range(1, 366):
+    for i in range(0, 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
@@ -328,7 +328,7 @@ def check_class_date(subject_date, subject):
 def get_class_dates(subject):
     subject_dates = []
     AB = 0
-    for i in range(1, 366):
+    for i in range(0, 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
