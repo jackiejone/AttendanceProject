@@ -503,7 +503,7 @@ def logtime():
                                     db.session.add(new_time)
                                     db.session.flush()
                                 except:
-                                    return 'An Error Occured'
+                                    return 'An Error Occurred'
                                 else:
                                     return 'Success'
                         try:
@@ -511,7 +511,7 @@ def logtime():
                             db.session.add(new_time)
                             db.session.flush()
                         except:
-                            return 'An Error Occured'
+                            return 'An Error Occurred'
                         else:
                             return 'Success'
     return user_code
@@ -711,7 +711,7 @@ def scanner():
 def error404(e):
     return render_template('error404.html')
 
-# Route for handing error 405; Invlaid request method
+# Route for handing error 405; Invalid request method
 @app.errorhandler(405)
 def error405(e):
     flash('Invalid Request Method')
@@ -719,5 +719,5 @@ def error405(e):
 
 @app.errorhandler(500)
 def error500(e):
-    flash('An error occured on our side')
+    flash('An error occurred on our side')
     return redirect(url_for('home'))
