@@ -407,8 +407,8 @@ def class_code(class_code, user_code, day):
                                                                             minute=subject_datetime['subject'].time.start_time.minute,
                                                                             second=subject_datetime['subject'].time.start_time.second),
                                                                             user=user.id, subject=subject.id).first()
-                    print(duplicate_attendance_time)
-                    if duplicate_attendance_time:
+                    if duplicate_attendance_time: # checks if there is already an attendance time for this subject and user on a particular day
+                        # Updates the attendance status instead of adding a new entry to the database for this subject, user and time of attendance
                         if duplicate_attendance_time.attnd_status != form.status.data:
                             duplicate_attendance_time.attnd_status = form.status.data
                             try:
@@ -422,6 +422,8 @@ def class_code(class_code, user_code, day):
                         else:
                             flash('Attendance was not updated')
                     else:
+                        # if there is no duplicate of the attendance time, user, and class then add a new entry for that attendance
+                        # into the database
                         try:
                             new_time = AttendanceTime(time=datetime.datetime(year=date.year, month=date.month, day=date.day,
                                                       hour=subject_datetime['subject'].time.start_time.hour,
@@ -446,7 +448,14 @@ def class_code(class_code, user_code, day):
         # User is a student and they're viewing their class
         elif (current_user.auth == 'student' and class_code in
             [x.subject.code for x in current_user.subjects]):
-            return render_template("studentclass.html", subject=subject, days=CONSTANT_DAYS)
+            # Gets the user's attendance times from the database
+            student_attnd_times = AttendanceTime.query.filter_by(user=user.id, subject=subject.id).all()
+
+            attendance_on_day = None
+            for time in student_attnd_times:
+                if time.time.date() == (datetime.date(2019, 12, 31) + datetime.timedelta(days=day)).date():
+                    attendance_on_day = time
+            return render_template("studentclass.html", subject=subject, days=CONSTANT_DAYS, attnd_times=student_attnd_times, attnd_day=attendance_on_day)
         
         # User is a student but they're not viewing one of their class
         else:
@@ -458,11 +467,16 @@ def class_code(class_code, user_code, day):
 @app.route('/account/<user_code>')
 @login_required
 def account(user_code):
+    # Checks if the user is a student and if they are viewing their own account page
     if current_user.auth == 'student':
         if current_user.user_code != user_code:
+            # redirects the student if they're not viewing their own account page
             flash('You do not have access to this page')
             return redirect(url_for('home'))
 
+    # This is only accesss able to users which are no students.
+    # Queries the database for the user which is being viewed if there is no user
+    # returned then the person viewing the page is redirected
     user = User.query.filter_by(user_code=user_code).first()
     if not user:
         flash('User does not exist')
@@ -497,6 +511,7 @@ def logtime():
             # Checks if the user is in the class/es which are associated with the scanner
             # if the user is in a class that is associated with the scanner, it will check current time with
             # the times of the scanner 
+            # TODO: Leave it because its used for the RFID scanner
             # Broken because it doesnt check the day of week or week A/B of the time and it doesnt work if there are
             # two classes on the same scanner on that day
             for i in scanner.subject:

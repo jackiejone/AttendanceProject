@@ -11,4 +11,26 @@
             {% endfor %}
         </ul>
     {% endif %}
+
+    <h1>Attendance</h1>
+    {% if attnd_times %}
+        <ul>
+            {% for time in attnd_times %}
+                <li>{{ time.time.date() }} {{ time.time.time() }} {{ time.attnd_status }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No Attendance Logs For This Class</p>
+    {% endif %}
+
+
+
+    {% if attnd_day %}
+        <ul>
+            <li>{{ attnd_day.time.date() }} {{ attnd_day.time.time() }} {{ attnd_day.attnd_status }}</li>
+        </ul>
+    {% else %}
+        <p>No Attendance Attendance Logged For This Day</p>
+    {% endif %}
+    
 {% endblock %}
