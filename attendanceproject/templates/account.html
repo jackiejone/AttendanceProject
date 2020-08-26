@@ -1,4 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>My account</h1>
+    <h1>{{ user.fname }} {{ user.lname }}</h1>
+
+    <h3>{{ user.email }}</h3>
+
+    <ul>
+        {% for subject in user.subjects %}
+            <li>{{ subject.subject.name }}</li>
+        {% endfor %}
+    </ul>
 {% endblock %}

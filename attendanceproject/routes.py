@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from string import ascii_letters, digits
 from random import choice
 import datetime
+from math import ceil
 
 
 CONSTANT_DAYS = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') 
@@ -119,14 +120,9 @@ def check_conflicting_times(user, subject_id):
                         return True
     return False
 
- # This function returns the nth day of the year
+# This function returns the nth day of the year
 def day_num():
-    for i in range(0, 366):
-        date = datetime.timedelta(days=i)
-        start_date = datetime.date(2019, 12, 31)
-        end_date = start_date + date
-        if end_date == datetime.date.today():
-            return i
+    return datetime.date.today().timetuple().tm_yday
 
 # Classes Route
 @app.route('/account/<user_code>/classes', methods=['GET', 'POST'])
@@ -310,10 +306,18 @@ def view_subject(subject):
         flash('Class could not be found')
         return redirect(url_for('all_classes'))
 
+# This function returns the number of days until the first monday of the year
+def first_monday():
+    for i in range(0, 366):
+        start_date = datetime.date(year=datetime.datetime.today().year, month=1, day=1)
+        end_date = start_date + datetime.timedelta(days=i)
+        if end_date.timetuple().tm_wday == 0:
+            return i
+
 # This function checks if the a subject is on a particular date
 def check_class_date(subject_date, subject):
-    AB = 0
-    for i in range(0, 366):
+    AB = 1
+    for i in range(1 + first_monday(), 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
@@ -327,8 +331,8 @@ def check_class_date(subject_date, subject):
 # Function to get all the dates which a class/subject lands on
 def get_class_dates(subject):
     subject_dates = []
-    AB = 0
-    for i in range(0, 366):
+    AB = 1
+    for i in range(1 + first_monday(), 366):
         date = datetime.timedelta(days=i)
         start_date = datetime.date(2019, 12, 31)
         end_date = start_date + date
@@ -338,16 +342,9 @@ def get_class_dates(subject):
         AB = not AB if end_date.isoweekday() == 5 else AB
     return subject_dates
  
+# Function to return the week of the year
 def current_week(viewing_date=datetime.date.today()):
-    week = 0
-    for i in range (1, 366):
-        date = datetime.timedelta(days=i)
-        start_date = datetime.date(2019, 12, 31)
-        end_date = start_date + date
-        if end_date == viewing_date:
-            return 'A' if not week else 'B'
-        if end_date.isoweekday() == 7:
-            week = not week
+    return 'B' if (ceil((viewing_date.timetuple().tm_yday - first_monday())/7))%2 else 'A'
 
 # Route for viewing a subject/class for a specific user as a specfic user
 # This route is split up into three main sections for handling 3 different situations
@@ -458,16 +455,21 @@ def class_code(class_code, user_code, day):
     return render_template("teacherclass.html", subject=subject)
 
 # Account Route
-@app.route('/account/<user>')
+@app.route('/account/<user_code>')
 @login_required
-def account(user):
-    return render_template("account.html")
+def account(user_code):
+    if current_user.auth == 'student':
+        if current_user.user_code != user_code:
+            flash('You do not have access to this page')
+            return redirect(url_for('home'))
 
-@app.route('/test', methods=['GET', 'POST'])
-def test():
-    print(current_user.tags)
-    print([tag.tag_uid for tag in current_user.tags])
-    return 'test'
+    user = User.query.filter_by(user_code=user_code).first()
+    if not user:
+        flash('User does not exist')
+        return redirect(url_for('home'))
+
+    return render_template("account.html", user=user)
+
 
 # Route for logging attendance using a post reqeust from an external http client
 @app.route('/logtime', methods=['POST'])
@@ -492,7 +494,11 @@ def logtime():
         if not scanner:
             return "Unidentified Scanner"
         else:
-            # Does stuff V?
+            # Checks if the user is in the class/es which are associated with the scanner
+            # if the user is in a class that is associated with the scanner, it will check current time with
+            # the times of the scanner 
+            # Broken because it doesnt check the day of week or week A/B of the time and it doesnt work if there are
+            # two classes on the same scanner on that day
             for i in scanner.subject:
                 for x in i.users:
                     if x.user == user:
@@ -721,3 +727,9 @@ def error405(e):
 def error500(e):
     flash('An error occured on our side')
     return redirect(url_for('home'))
+
+@app.route('/test', methods=['GET', 'POST'])
+def test():
+    print(current_user.tags)
+    print([tag.tag_uid for tag in current_user.tags])
+    return 'test'

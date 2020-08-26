@@ -50,6 +50,8 @@
                 <li>{% for i in time %} {{ i }} {% endfor %}</li>
             {% endfor %}
         </ul>
+    {% else %}
+        <p>No student times</p>
     {% endif %}
     <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
 {% endblock %}

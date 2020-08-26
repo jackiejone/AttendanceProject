@@ -11,6 +11,7 @@ def first_monday():
         end_date = start_date + datetime.timedelta(days=i)
         if end_date.timetuple().tm_wday == 0:
             return i
+print("frist monday" + str(first_monday()))
 fm = first_monday()
 for i in range(0+fm, 365-fm):
     end_date = datetime.date(year=datetime.datetime.today().year, month=1, day=1) + datetime.timedelta(days=i)
