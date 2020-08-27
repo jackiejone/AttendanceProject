@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>Viewing <div class='name'>{{ subject.name }}</div> as <div class='name'>{{ user.fname }} {{ user.lname }}</div></h1>
-    <a href="{{ prev_next['prev_day'] }}">Prevous Day</a><a href="{{ prev_next['next_day'] }}">Next Day</a>
+    <a href="{{ prev_next['prev_day'] }}">Prevous Day</a> <a href="{{ prev_next['today'] }}">Today</a> <a href="{{ prev_next['next_day'] }}">Next Day</a>
     <!-- Displaying all the users in the class if the user viewing the class is a teacher -->
     <h2>Times</h2>
     {% if subject.times %}
@@ -17,7 +17,7 @@
         <ul>
         {% for user in subject.users %}
             {% if user.user_type == 'student'%}
-                <a href="{{ url_for('class_code', user_code=user.user.user_code, class_code=subject.code, day=day_num) }}"><li>{{ user.user.fname }}</li></a>
+                <a href="{{ url_for('class_code', user_code=user.user.user_code, class_code=subject.code, day=viewing_day) }}"><li>{{ user.user.fname }}</li></a>
             {% endif %}
         {% endfor %}
         </ul>
@@ -31,7 +31,7 @@
     <ul>
         {% if student_times %}
             {% for i in student_times %}
-                <li>Student: <div class='capatalize'><a href="{{ url_for('class_code', user_code=i[0].user_code, class_code=subject.code, day=day_num) }}">{{ i[0].fname }}</a></div> Status: <div class='capatalize'>{{ i[1] }}</div></li>
+                <li>Student: <div class='capatalize'><a href="{{ url_for('class_code', user_code=i[0].user_code, class_code=subject.code, day=viewing_day) }}">{{ i[0].fname }}</a></div> Status: <div class='capatalize'>{{ i[1] }}</div></li>
             {% endfor %}
         {% endif %}
     </ul>

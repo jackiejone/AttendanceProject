@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>{{ subject.name }} {{ user.fname }} {{ user.lname }}</h1>
+    <h1><a href="{{ url_for('class_code', class_code=subject.code, user_code=teacher.user_code, day=day) }}">{{ subject.name }}</a> | {{ user.fname }} {{ user.lname }}</h1>
 
     <!-- Displaying all the users in the class if the user viewing the class is a teacher -->
     <h2>Times</h2>
@@ -44,10 +44,18 @@
         {{ form.submit }}
     </form>
 
+    <h3>Attendance Toady</h3>
+    {% if user_attendance_toady %}
+        <p>{{ user_attendance_toady.time }} {{ user_attendance_toady.attnd_status }}</p>
+    {% else %}
+        <p>N/A</p>
+    {% endif %}
+
+    <h3>Date Viewing: {{ current_date }} | Today's Date: {{ today_date }}</h3>
     {% if student_times %}
         <ul>
             {% for time in student_times %}
-                <li>{% for i in time %} {{ i }} {% endfor %}</li>
+                <li>{{ time.time }} {{ time.attnd_status }}</li>
             {% endfor %}
         </ul>
     {% else %}

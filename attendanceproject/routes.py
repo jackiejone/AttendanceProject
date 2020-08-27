@@ -356,7 +356,8 @@ def current_week(viewing_date=datetime.date.today()):
 def class_code(class_code, user_code, day):
     subject = SubjectCode.query.filter_by(code=class_code).first()
     prev_next = {'next_day':url_for('class_code', class_code=class_code, user_code=user_code, day=day+1),
-                 'prev_day':url_for('class_code', class_code=class_code, user_code=user_code, day=day-1)}
+                 'prev_day':url_for('class_code', class_code=class_code, user_code=user_code, day=day-1),
+                 'today':url_for('class_code', class_code=class_code, user_code=user_code, day=datetime.date.today().timetuple().tm_yday)}
     if not subject:
         flash('Class could not be found')
         return redirect(url_for('classes', user_code=current_user.user_code))
@@ -389,14 +390,14 @@ def class_code(class_code, user_code, day):
                         else:
                             student_times.append((user.user, "N/A"))
             if check:
-                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next)
-            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next)
+                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next, viewing_day=day)
+            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next, viewing_day=day)
             
             
         # User is a teacher viewing the class of a student
         # For this one, show the attendance of the student and be able to change attendnance
         elif current_user.auth == 'teacher' and user.auth == 'student':
-            form = AddStudentAttndTime()
+            form = AddStudentAttndTime(day=current_date.day, month=current_date.month)
 
             if request.method == "POST" and form.validate_on_submit():
                 date = datetime.date(year=datetime.date.today().year, month=form.month.data, day=form.day.data)
@@ -440,10 +441,13 @@ def class_code(class_code, user_code, day):
                 else:
                     flash('Date was not a valid date for the subject')
             class_times = get_class_dates(subject) 
-            #user = User.query.filter_by(user_code=user_code).first()
-            times = [(x.time, x.attnd_status) for x in user.attnd_times if x.subject == subject.id] # Gets the all the attendance times and dates of a parcitular student for a  subject
-            print(times)
-            return render_template("teacherstudentclass.html", subject=subject, user=current_user, days=CONSTANT_DAYS, student_times=times, form=form, class_times=class_times)
+            user_attendance_times = AttendanceTime.query.filter_by(user=user.id, subject=subject.id).all()
+            user_attendance_today = None
+            for i in user_attendance_times:
+                if i.time.date() == current_date:
+                    user_attendance_today = i #BROKEN
+            return render_template("teacherstudentclass.html", subject=subject, user=user, days=CONSTANT_DAYS, student_times=user_attendance_times, form=form, class_times=class_times,
+                                   current_date=current_date.strftime('%d/%m/%y'), day=day, today_date=datetime.date.today().strftime('%d/%m/%y'), teacher=current_user, user_attendance_today=user_attendance_today)
         
         # User is a student and they're viewing their class
         elif (current_user.auth == 'student' and class_code in
