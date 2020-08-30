@@ -454,12 +454,17 @@ def class_code(class_code, user_code, day):
             [x.subject.code for x in current_user.subjects]):
             # Gets the user's attendance times from the database
             student_attnd_times = AttendanceTime.query.filter_by(user=user.id, subject=subject.id).all()
-
+            student_attnd_times_weeks = []
+            for i in student_attnd_times:
+                if ((ceil((i.time.timetuple().tm_yday)/7))) % 2 == 0:
+                    student_attnd_times_weeks.append((i, i.time.timetuple().tm_wday, "A"))
+                else:
+                    student_attnd_times_weeks.append((i, i.time.timetuple().tm_wday, "B"))
             attendance_on_day = None
             for time in student_attnd_times:
-                if time.time.date() == (datetime.date(2019, 12, 31) + datetime.timedelta(days=day)).date():
+                if time.time.date() == (datetime.date(2019, 12, 31) + datetime.timedelta(days=day)):
                     attendance_on_day = time
-            return render_template("studentclass.html", subject=subject, days=CONSTANT_DAYS, attnd_times=student_attnd_times, attnd_day=attendance_on_day)
+            return render_template("studentclass.html", subject=subject, days=CONSTANT_DAYS, attnd_times=student_attnd_times_weeks, attnd_day=attendance_on_day, current_date=current_date)
         
         # User is a student but they're not viewing one of their class
         else:

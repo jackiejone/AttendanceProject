@@ -10,13 +10,15 @@
                 <li>{{ time.time.start_time }} {{ time.time.end_time }} {% if not time.sweek %} A {% else %} B {% endif %} {{ days[time.sday] }}</li>
             {% endfor %}
         </ul>
+    {% else %}
+        <p>No times set for this class</p>
     {% endif %}
 
-    <h1>Attendance</h1>
+    <h2>Attendance History</h2>
     {% if attnd_times %}
         <ul>
             {% for time in attnd_times %}
-                <li>{{ time.time.date() }} {{ time.time.time() }} {{ time.attnd_status }}</li>
+                <li>{{ time[0].time.date() }} {{ time[0].time.time() }} {{ time[0].attnd_status }} {{ days[time[1]] }} {{ time[2] }}</li>
             {% endfor %}
         </ul>
     {% else %}
@@ -26,11 +28,12 @@
 
 
     {% if attnd_day %}
+        <h2>Attendance For {{ attnd_day.time.date() }}</h2>
         <ul>
-            <li>{{ attnd_day.time.date() }} {{ attnd_day.time.time() }} {{ attnd_day.attnd_status }}</li>
+            <li>{{ attnd_day.time.time() }} {{ attnd_day.attnd_status }}</li>
         </ul>
     {% else %}
-        <p>No Attendance Attendance Logged For This Day</p>
+        <h2>No Attendance Attendance Logged For {{ current_date }}</h2>
     {% endif %}
     
 {% endblock %}
