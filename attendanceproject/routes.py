@@ -130,7 +130,7 @@ def day_num():
 def classes(user_code):
     # Distingusts between different types of users, teachers and students to
     # present different functions to each party
-    if current_user.auth == 'teacher':
+    if current_user.auth in ['teacher', 'admin']:
         user = User.query.filter_by(user_code=user_code).first()
         if not user:
             flash('User not found')
@@ -193,7 +193,6 @@ def classes(user_code):
             # Checks if the class exists by checking if there is data returned from the database
             if join_class:
                 #  Checks if the user is already associated with the suject/in the subject(in the class)
-                # TODO : Turn this into a function \/
                 if join_class.id in [x.subject_id for x in current_user.subjects]:
                     flash('You have already joined this class')
                 # Associating the user with the class
@@ -236,7 +235,7 @@ def generate_code():
 @login_required
 def create_class():
     # Checking if the user accessing the page is a teacher
-    if current_user.auth != "teacher":
+    if current_user.auth not in ['teacher', 'admin']:
         flash("You do not have permission to access this page")
         # Redirects the user back to the home page if they're not a teacher
         return redirect(url_for('home'))
@@ -283,7 +282,7 @@ def create_class():
 @login_required
 def all_classes():
     # Checking if the user is a teacher
-    if current_user.auth != "teacher":
+    if current_user.auth not in ['teacher', 'admin']:
         flash('You do not have access to this page')
         return redirect(url_for('home'))
     # Getting all the classes/subjects form the database
@@ -295,7 +294,7 @@ def all_classes():
 @login_required
 def view_subject(subject):
     # Checking if the user is a teacher
-    if current_user.auth != "teacher":
+    if current_user.auth not in ['teacher', 'admin']:
         flash('You do not have access to this page')
         return redirect(url_for('home'))
     # getting the class/subject from the database
@@ -366,7 +365,7 @@ def class_code(class_code, user_code, day):
         total_days = day_num() - day
         current_date = datetime.date.today() - datetime.timedelta(days=total_days)
         # For this one, show the attendane of each student in the class on a certain day
-        if (current_user.auth == 'teacher' and class_code in
+        if (current_user.auth in ['teacher', 'admin'] and class_code in
             [x.subject.code for x in current_user.subjects]) and user == current_user:
 
             # Getting the date of which the user is viewing via the "day" parameter in the link
@@ -396,7 +395,7 @@ def class_code(class_code, user_code, day):
             
         # User is a teacher viewing the class of a student
         # For this one, show the attendance of the student and be able to change attendnance
-        elif current_user.auth == 'teacher' and user.auth == 'student':
+        elif current_user.auth in ['teacher', 'admin'] and user.auth == 'student':
             form = AddStudentAttndTime(day=current_date.day, month=current_date.month)
 
             if request.method == "POST" and form.validate_on_submit():
@@ -473,7 +472,7 @@ def class_code(class_code, user_code, day):
     return render_template("teacherclass.html", subject=subject)
 
 # Account Route
-@app.route('/account/<user_code>')
+@app.route('/account/<user_code>', methods=['GET', 'POST'])
 @login_required
 def account(user_code):
     # Checks if the user is a student and if they are viewing their own account page
@@ -491,7 +490,21 @@ def account(user_code):
         flash('User does not exist')
         return redirect(url_for('home'))
 
-    return render_template("account.html", user=user)
+    if current_user.auth == "admin" and user.auth != "admin":
+        form = SetAuth(user_auth=user.auth)
+        if request.method == 'POST' and form.validate_on_submit():
+            user.auth = form.user_auth.data
+            try:
+                db.session.flush()
+            except:
+                db.session.rollback()
+                flash("An Error Occured, failed to change user auth")
+            else:
+                db.session.commit()
+                flash("Successfully changed user's auth")
+    else:
+        form = None
+    return render_template("account.html", user=user, form=form)
 
 
 # Route for logging attendance using a post reqeust from an external http client
@@ -563,7 +576,7 @@ def get_start_time(time):
 @login_required
 def addtime():
     # Checking if the user is a teacher or not
-    if current_user.auth != 'teacher':
+    if current_user.auth not in ['teacher', 'admin']:
         flash('You do not have permission to access this page')
         return redirect(url_for('home'))
     
@@ -594,7 +607,7 @@ def addtime():
 @app.route('/delete_times', methods=['POST'])
 @login_required
 def removetime():
-    if current_user.auth != 'teacher':
+    if current_user.auth not in ['teacher', 'admin']:
         flash('You do not have permission to access this page')
         return redirect(url_for('addtime'))
 
@@ -624,13 +637,11 @@ def get_times():
     times = sorted(Times.query.all(), key=get_start_time)
     return [(time.id, time.start_time) for time in times]
     
-# Route for setting the time of a specific class/subject for each
-# week and day
-# TODO: Make sure that a class can only be on once a day (i.e. once for every combination of Week and Day)
+# Route for setting the time of a specific class/subject for each week and day
 @app.route('/classes/<class_code>/settimes', methods=["GET", "POST"])
 @login_required
 def settimes(class_code):
-    if current_user.auth != 'teacher':
+    if current_user.auth not in ['teacher', 'admin']:
         flash('You do not have permission to access this page')
         return redirect(url_for('home'))
 
@@ -692,12 +703,12 @@ def settimes(class_code):
 @app.route('/students', methods=['GET'])
 @login_required
 def students():
-    if current_user.auth == 'teacher':
+    if current_user.auth in ['teacher', 'admin']:
         students = User.query.filter_by(auth='student').all()
         my_students = []
         for subject in current_user.subjects:
             for user in subject.subject.users:
-                if user.user.auth != 'teacher' and user.user not in my_students:
+                if user.user.auth not in ['teacher', 'admin'] and user.user not in my_students:
                     my_students.append(user.user)
         return render_template('students.html', students=students, my_students=my_students)
     else:
@@ -708,7 +719,7 @@ def students():
 @app.route("/scanner", methods=['GET', 'POST'])
 @login_required
 def scanner():
-    if current_user.auth != 'teacher':
+    if current_user.auth not in ['teacher', 'admin']:
         flash('You do not have permission to access this page')
         return redirect(url_for('home'))
     

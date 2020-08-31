@@ -133,5 +133,5 @@ class AddStudentAttndTime(FlaskForm):
     submit = SubmitField('Submit')
 
 class SetAuth(FlaskForm):
-    auth = SelectField("Authentication", choices=[("teacher", "Teacher"), ("student', 'Student")], coerce=str)
+    user_auth = SelectField("Authentication", choices=[("teacher", "Teacher"), ("student", "Student")])
     submit = SubmitField('Change')

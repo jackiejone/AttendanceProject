@@ -5,7 +5,7 @@
             <li><a href="{{url_for('home')}}">Home</a></li>
             {% if current_user.is_authenticated %}
                 <li><a href="{{url_for('classes', user_code=current_user.user_code)}}">Classes</a></li>
-                {% if current_user.auth == 'teacher' %}
+                {% if current_user.auth in ['teacher', 'admin' ]%}
                     <li><a href="{{url_for('students')}}">Students</li></a>
                     <li><a href="{{url_for('create_class')}}">New Class</a></li>
                     <li><a href="{{url_for('addtime')}}">Add Times</a></li>

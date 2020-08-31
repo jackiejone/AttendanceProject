@@ -2,11 +2,32 @@
 {% block content %}
     <h1>{{ user.fname }} {{ user.lname }}</h1>
 
-    <h3>{{ user.email }}</h3>
+    <h2>{{ user.email }}</h2>
 
-    <ul>
-        {% for subject in user.subjects %}
-            <li>{{ subject.subject.name }}</li>
-        {% endfor %}
-    </ul>
+    {% if form %}
+        <h3>Change user's Authentication</h3>
+        <form action="" method="POST">
+            {{ form.hidden_tag() }}
+            {% if form.user_auth.errors %}
+                <ul>
+                    {% for error in form.user_auth.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {{ form.user_auth }}
+            {{ form.submit }}
+        </form>
+    {% endif %}
+
+    <h3>Classes</h3>
+    {% if user.subjects %}
+        <ul>
+            {% for subject in user.subjects %}
+                <li>{{ subject.subject.name }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Not enrolled in any classes</p>
+    {% endif %}
 {% endblock %}
