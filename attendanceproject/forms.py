@@ -131,4 +131,7 @@ class AddStudentAttndTime(FlaskForm):
     month = SelectField("Month", choices=[(x, x) for x in range(1, 13)], coerce=int)
     status = SelectField('Attendance Status', choices=[('present', 'Present'), ('late', 'Late'), ('absent', 'Absent')], coerce=str, validators=[InputRequired()])
     submit = SubmitField('Submit')
-    
+
+class SetAuth(FlaskForm):
+    auth = SelectField("Authentication", choices=[("teacher", "Teacher"), ("student', 'Student")], coerce=str)
+    submit = SubmitField('Change')
