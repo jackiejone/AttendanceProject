@@ -3,7 +3,7 @@
     <h1>Classes for</h1>
     <h2>{{ user.fname }} {{ user.lname }} {{ user.user_code }}</h2>
 
-    {% if current_user.auth == 'teacher' %}
+    {% if current_user.auth in ['teacher', 'admin'] %}
         <a href="{{ url_for('all_classes') }}">All Classes</a>
     {% endif %}
 
