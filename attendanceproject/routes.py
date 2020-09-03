@@ -19,6 +19,24 @@ CONSTANT_DAYS = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturd
 @app.route('/', methods=["GET"])
 @app.route('/home', methods=["GET"])
 def home():
+    if not current_user.is_anonymous and current_user.auth == 'student':
+        user_attendance_today = []
+        for subject in current_user.subjects:
+            for subject_times in subject.subject.times:
+                if (subject_times.sweek == (ceil((datetime.date.today().timetuple().tm_yday - first_monday())/7))%2
+                    and subject_times.sday == datetime.date.today().timetuple().tm_wday):
+                    subject_time = subject_times.time.start_time
+
+                    subject_attnd_times = AttendanceTime.query.filter_by(subject=subject.id)
+                    added = False
+                    for i in subject_attnd_times:
+                        if added:
+                            break
+                        if i.time.date() == datetime.date.today():
+                            user_attendance_today.append((i.subject.name, i.attnd.status, subject_time))
+                    if not added:
+                        user_attendance_today.append((subject.subject.name, 'N/A', subject_time))
+        print(user_attendance_today)
     return render_template("home.html")
 
 # Register Route
@@ -498,7 +516,7 @@ def account(user_code):
                 db.session.flush()
             except:
                 db.session.rollback()
-                flash("An Error Occured, failed to change user auth")
+                flash("An Error Occurred, failed to change user auth")
             else:
                 db.session.commit()
                 flash("Successfully changed user's auth")
@@ -546,7 +564,7 @@ def logtime():
                                     db.session.add(new_time)
                                     db.session.flush()
                                 except:
-                                    return 'An Error Occured'
+                                    return 'An Error Occurred'
                                 else:
                                     return 'Success'
                         try:
@@ -554,7 +572,7 @@ def logtime():
                             db.session.add(new_time)
                             db.session.flush()
                         except:
-                            return 'An Error Occured'
+                            return 'An Error Occurred'
                         else:
                             return 'Success'
     return user_code
@@ -752,7 +770,7 @@ def scanner():
 def error404(e):
     return render_template('error404.html')
 
-# Route for handing error 405; Invlaid request method
+# Route for handing error 405; Invalid request method
 @app.errorhandler(405)
 def error405(e):
     flash('Invalid Request Method')
@@ -760,7 +778,7 @@ def error405(e):
 
 @app.errorhandler(500)
 def error500(e):
-    flash('An error occured on our side')
+    flash('An error occurred on our side')
     return redirect(url_for('home'))
 
 @app.route('/test', methods=['GET', 'POST'])

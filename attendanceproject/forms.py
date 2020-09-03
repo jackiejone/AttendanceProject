@@ -14,11 +14,11 @@ import datetime
 class RegisterForm(FlaskForm):
     fname = StringField('First Name',
                         validators=[Length(min=1, max=20),
-                                    InputRequired(message='Input Requried')],
+                                    InputRequired(message='Input Required')],
                         render_kw={"placeholder": "First Name"})
     lname = StringField('Last Name',
                         validators=[Length(min=1, max=20),
-                                    InputRequired(message='Input Requried')],
+                                    InputRequired(message='Input Required')],
                         render_kw={"placeholder": "Last Name"})
     std_code = StringField('Student Code',
                            validators=[InputRequired(message='Field Required'),
