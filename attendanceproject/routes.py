@@ -19,25 +19,27 @@ CONSTANT_DAYS = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturd
 @app.route('/', methods=["GET"])
 @app.route('/home', methods=["GET"])
 def home():
-    if not current_user.is_anonymous and current_user.auth == 'student':
+    if not current_user.is_anonymous and current_user.auth == 'student': # checks if the user is logged in and is a student
         user_attendance_today = []
+        # Checks if the user has a class on today and checks if there is an attendance set for that class.
+        # if there is, the attendance status will be displayed of it is not then 'N/A' will be displayed
         for subject in current_user.subjects:
             for subject_times in subject.subject.times:
                 if (subject_times.sweek == (ceil((datetime.date.today().timetuple().tm_yday - first_monday())/7))%2
                     and subject_times.sday == datetime.date.today().timetuple().tm_wday):
                     subject_time = subject_times.time.start_time
-
-                    subject_attnd_times = AttendanceTime.query.filter_by(subject=subject.id)
+                    subject_attnd_times = AttendanceTime.query.filter_by(subject=subject.subject.id).all()
                     added = False
                     for i in subject_attnd_times:
                         if added:
                             break
                         if i.time.date() == datetime.date.today():
-                            user_attendance_today.append((i.subject.name, i.attnd.status, subject_time))
+                            user_attendance_today.append((subject.subject.name, i.attnd_status, subject_time))
+                            added = True
                     if not added:
                         user_attendance_today.append((subject.subject.name, 'N/A', subject_time))
-        print(user_attendance_today)
-    return render_template("home.html")
+        return render_template("home.html", user_attendance_today=user_attendance_today, user=current_user)
+    return render_template("home.html", user_attendance_today=None, user=current_user)
 
 # Register Route
 @app.route('/register', methods=['GET', 'POST'])
