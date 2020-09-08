@@ -189,14 +189,14 @@ def classes(user_code):
         if request.method == 'POST' and form.validate_on_submit():
             # Queries the database for the subject based on the join code that
             # was entered into the form
-            join_class = SubjectCode.query.filter_by(join_code=form.code.data).first()
+            join_class = SubjectCode.query.filter_by(join_code=form.code.data.strip()).first()
             # Checks if the class exists by checking if there is data returned from the database
             if join_class:
                 #  Checks if the user is already associated with the suject/in the subject(in the class)
                 if join_class.id in [x.subject_id for x in current_user.subjects]:
                     flash('You have already joined this class')
                 # Associating the user with the class
-                elif check_conflicting_times(current_user, form.code.data):
+                elif check_conflicting_times(current_user, form.code.data.strip()):
                     flash('The class you are trying to join has a conflicting time with one of your other classes')
                     user_classes = subject_name(current_user) # Getting a list of the user's subjects/classes
                     return render_template('my_classes.html', form=form, user=current_user, user_classes=user_classes, day_num=day_num())
