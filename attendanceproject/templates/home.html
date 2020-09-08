@@ -1,4 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>Home</h1>
+
+    
+    {% if not user.is_anonymous and user.auth == 'student' %}
+        <h2>Attendance Today</h2>
+        {% if user_attendance_today %}
+            <ul>
+                {% for i in user_attendance_today %}
+                    <li>Class: {{ i[0] }} Status: {{ i[1] }} Time: {{ i[2] }}</li> 
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No Classes On Today</p>
+        {% endif %}
+    {% endif %}
 {% endblock %}
