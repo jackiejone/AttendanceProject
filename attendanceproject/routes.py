@@ -524,7 +524,29 @@ def account(user_code):
                 flash("Successfully changed user's auth")
     else:
         form = None
-    return render_template("account.html", user=user, form=form)
+
+    if current_user == user:
+        password_form = ChangePassword()
+        password_form.next_page.data = request.path
+        return render_template("account.html", user=user, form=form, passwdform=password_form)
+    return render_template("account.html", user=user, form=form, passwdform=None)
+
+@app.route('/update-password', methods=['POST']) # Move this so that there are two forms in the above rotue
+@login_required
+def update_password():
+    form = ChangePassword(request.form)
+    if check_password_hash(current_user.password, form.oldpasswd.data):
+        if form.validate_on_submit():
+            current_user.password = generate_password_hash(form.newpasswd.data, method='sha256', salt_length=10)
+            db.session.commit()
+        else:
+            flash('failed to validate')
+            print(form.errors)
+            form.errors = {'confirm_password': ['Hello']}
+            print(form.errors)
+    else:
+        flash('Invalid Password')
+    return redirect(request.form['next_page'])
 
 
 # Route for logging attendance using a post reqeust from an external http client
@@ -734,6 +756,13 @@ def students():
     else:
         flash('You do not have access to this page')
         return redirect(url_for('home'))
+
+@app.route('/all_users', methods=['GET'])
+@login_required
+def all_users():
+    if current_user.auth == 'admin':
+        users = User.query.all()
+        return render_template('allusers.html', users=users)
 
 # Route for adding a scanner to a subject/class
 @app.route("/scanner", methods=['GET', 'POST'])

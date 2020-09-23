@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SelectField, IntegerField, PasswordField,
                      BooleanField, SubmitField, SelectMultipleField, FieldList,
-                     FormField, RadioField, DateField)
+                     FormField, RadioField, DateField, HiddenField)
 from wtforms.widgets import CheckboxInput, ListWidget
 from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError, AnyOf, StopValidation
 from wtforms.fields.html5 import TimeField
@@ -135,3 +135,16 @@ class AddStudentAttndTime(FlaskForm):
 class SetAuth(FlaskForm):
     user_auth = SelectField("Authentication", choices=[("teacher", "Teacher"), ("student", "Student")])
     submit = SubmitField('Change')
+
+class ChangePassword(FlaskForm):
+    oldpasswd = PasswordField('Current Password', validators=[InputRequired(message='Field Required'),
+                             Length(min=4)],
+                             render_kw={"placeholder": "Current Password"})
+    newpasswd = PasswordField('Password', validators=[InputRequired(message='Field Required'),
+                                Length(min=4)],
+                                render_kw={"placeholder": "Password"})
+    confirm_password = PasswordField('Confirm Password', validators=[InputRequired(message='Field Required'),
+                                Length(min=4), EqualTo('newpasswd', message='Passwords Did not match')],
+                                    render_kw={"placeholder": "Confirm Password"})
+    next_page = HiddenField('next_page')
+    change = SubmitField('Update Password')
