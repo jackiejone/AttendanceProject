@@ -596,7 +596,7 @@ def get_start_time(time):
 @login_required
 def addtime():
     # Checking if the user is a teacher or not
-    if current_user.auth not in ['teacher', 'admin']:
+    if current_user.auth != 'admin':
         flash('You do not have permission to access this page')
         return redirect(url_for('home'))
     
@@ -739,7 +739,7 @@ def students():
 @app.route("/scanner", methods=['GET', 'POST'])
 @login_required
 def scanner():
-    if current_user.auth not in ['teacher', 'admin']:
+    if current_user.auth != 'admin':
         flash('You do not have permission to access this page')
         return redirect(url_for('home'))
     
