@@ -524,6 +524,15 @@ def account(user_code):
                 flash("Successfully changed user's auth")
     else:
         form = None
+# HERE
+    if current_user == user:
+        pwform = ChangePassword()
+        if request.method == 'POST' and pwform.validate_on_submit():
+            if check_password_hash(current_user.password, pwform.oldpasswd.data):
+                current_user.password = generate_password_hash(form.newpasswd.data, method='sha256', salt_length=10)
+                db.session.commit()
+            else:
+                flash('Wrong Password')
 
     if current_user == user:
         password_form = ChangePassword()
@@ -531,6 +540,7 @@ def account(user_code):
         return render_template("account.html", user=user, form=form, passwdform=password_form)
     return render_template("account.html", user=user, form=form, passwdform=None)
 
+# HERE
 @app.route('/update-password', methods=['POST']) # Move this so that there are two forms in the above rotue
 @login_required
 def update_password():
