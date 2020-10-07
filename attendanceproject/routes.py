@@ -1,8 +1,9 @@
-from flask import render_template, request, flash, redirect, url_for
+from os import abort
+from flask import render_template, request, flash, redirect, url_for, abort
 from attendanceproject import app, db
 from attendanceproject.forms import (RegisterForm, LoginForm, CreateClassForm, JoinClassForm, CodeJoinForm,
                                      AddTimesForm, SetTimesForm, UnsetTimesForm, AddScanner, AddStudentAttndTime,
-                                     SetAuth, ChangePassword)
+                                     SetAuth, ChangePassword, DeleteAccount)
 from attendanceproject.models import User, AttendanceTime, Scanner, UserSubject, SubjectTimes, SubjectCode, Times
 from flask_login import (login_user, login_required,
                          logout_user, current_user,
@@ -375,6 +376,9 @@ def current_week(viewing_date=datetime.date.today()):
 @app.route('/account/<user_code>/classes/<class_code>/<int:day>', methods=["GET", "POST"])
 @login_required
 def class_code(class_code, user_code, day):
+    if day > 365:
+        flash('Day number out of range')
+        abort(404)
     subject = SubjectCode.query.filter_by(code=class_code).first()
     prev_next = {'next_day':url_for('class_code', class_code=class_code, user_code=user_code, day=day+1),
                  'prev_day':url_for('class_code', class_code=class_code, user_code=user_code, day=day-1),
@@ -526,8 +530,23 @@ def account(user_code):
             else:
                 db.session.commit()
                 flash("Successfully changed user's auth")
+        if current_user != user:
+            delete_form = DeleteAccount()
+            
+            if request.method == 'POST' and delete_form.validate_on_submit():
+                db.session.delete(user)
+                try:
+                    db.session.flush()
+                except:
+                    flash('Failed to delete user')
+                else:
+                    db.session.commit()
+                    # ENDED HERE: NEED TO TEST DELETE FEATURE WITH ASSOCITATIONS AND NEED TO PUT IN HTML AND JINJA
+        else:
+            delete_form = None
     else:
         form = None
+        delete_form = None
 
     # Form for changing a user's password
     if current_user == user:

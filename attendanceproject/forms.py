@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SelectField, PasswordField, BooleanField,
                      SubmitField, SelectMultipleField, RadioField)
+from wtforms.fields.simple import HiddenField
 from wtforms.widgets import CheckboxInput, ListWidget
 from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError
 from wtforms.fields.html5 import TimeField
@@ -146,3 +147,7 @@ class ChangePassword(FlaskForm):
                                 Length(min=4), EqualTo('newpasswd', message='Passwords Did not match')],
                                     render_kw={"placeholder": "Confirm Password"})
     change = SubmitField('Update Password')
+    
+
+class DeleteAccount(FlaskForm):
+    delete = SubmitField('Delete Account')
