@@ -146,5 +146,4 @@ class ChangePassword(FlaskForm):
     confirm_password = PasswordField('Confirm Password', validators=[InputRequired(message='Field Required'),
                                 Length(min=4), EqualTo('newpasswd', message='Passwords Did not match')],
                                     render_kw={"placeholder": "Confirm Password"})
-    next_page = HiddenField('next_page')
     change = SubmitField('Update Password')

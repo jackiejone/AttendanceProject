@@ -502,7 +502,7 @@ def account(user_code):
             flash('You do not have access to this page')
             return redirect(url_for('home'))
 
-    # This is only accesss able to users which are no students.
+    # This is only accesss able to users which are not students.
     # Queries the database for the user which is being viewed if there is no user
     # returned then the person viewing the page is redirected
     user = User.query.filter_by(user_code=user_code).first()
@@ -510,6 +510,7 @@ def account(user_code):
         flash('User does not exist')
         return redirect(url_for('home'))
 
+    # Form for setting the authentication of a user
     if current_user.auth == "admin" and user.auth != "admin":
         form = SetAuth(user_auth=user.auth)
         if request.method == 'POST' and form.validate_on_submit():
@@ -524,39 +525,22 @@ def account(user_code):
                 flash("Successfully changed user's auth")
     else:
         form = None
-# HERE
-    if current_user == user:
-        pwform = ChangePassword()
-        if request.method == 'POST' and pwform.validate_on_submit():
-            if check_password_hash(current_user.password, pwform.oldpasswd.data):
-                current_user.password = generate_password_hash(form.newpasswd.data, method='sha256', salt_length=10)
-                db.session.commit()
-            else:
-                flash('Wrong Password')
 
+    # Form for changing a user's password
     if current_user == user:
         password_form = ChangePassword()
-        password_form.next_page.data = request.path
+        if request.method == 'POST' and password_form.validate_on_submit():
+            if check_password_hash(current_user.password, password_form.oldpasswd.data):
+                current_user.password = generate_password_hash(password_form.newpasswd.data, method='sha256', salt_length=10)
+                db.session.commit()
+                flash('Successfully Updated Password')
+            else:
+                flash('Invalid Password')
+        else:
+            print(password_form.confirm_password.errors)
+
         return render_template("account.html", user=user, form=form, passwdform=password_form)
     return render_template("account.html", user=user, form=form, passwdform=None)
-
-# HERE
-@app.route('/update-password', methods=['POST']) # Move this so that there are two forms in the above rotue
-@login_required
-def update_password():
-    form = ChangePassword(request.form)
-    if check_password_hash(current_user.password, form.oldpasswd.data):
-        if form.validate_on_submit():
-            current_user.password = generate_password_hash(form.newpasswd.data, method='sha256', salt_length=10)
-            db.session.commit()
-        else:
-            flash('failed to validate')
-            print(form.errors)
-            form.errors = {'confirm_password': ['Hello']}
-            print(form.errors)
-    else:
-        flash('Invalid Password')
-    return redirect(request.form['next_page'])
 
 
 # Route for logging attendance using a post reqeust from an external http client

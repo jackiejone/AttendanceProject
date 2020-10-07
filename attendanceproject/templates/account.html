@@ -5,14 +5,12 @@
     <h2>{{ user.email }}</h2>
 
     {% if passwdform != None %}
-        <form action="{{ url_for('update_password') }}" method="POST">
+        <form action="" method="POST">
             {{ passwdform.hidden_tag() }}
-            {{ passwdform.oldpasswd }}
-            {{ passwdform.newpasswd }}
-            {{ passwdform.confirm_password }}
-            {{ passwdform.next_page }}
-            {{ passwdform.change }}
-            {{ passwdform.errors }}
+            {{ render_field(passwdform.oldpasswd) }}
+            {{ render_field(passwdform.newpasswd) }}
+            {{ render_field(passwdform.confirm_password) }}
+            {{ render_field(passwdform.change) }}
         </form>
     {% endif %}
 
