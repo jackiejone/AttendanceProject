@@ -1,12 +1,14 @@
 from flask import render_template, request, flash, redirect, url_for
 from attendanceproject import app, db
-from attendanceproject.forms import *
-from attendanceproject.models import *
+from attendanceproject.forms import (RegisterForm, LoginForm, CreateClassForm, JoinClassForm, CodeJoinForm,
+                                     AddTimesForm, SetTimesForm, UnsetTimesForm, AddScanner, AddStudentAttndTime,
+                                     SetAuth, ChangePassword)
+from attendanceproject.models import User, AttendanceTime, Scanner, UserSubject, SubjectTimes, SubjectCode, Times
 from flask_login import (login_user, login_required,
                          logout_user, current_user,
                          fresh_login_required)
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from sqlalchemy.exc import IntegrityError
 from string import ascii_letters, digits
 from random import choice
 import datetime
@@ -494,6 +496,7 @@ def class_code(class_code, user_code, day):
 # Account Route
 @app.route('/account/<user_code>', methods=['GET', 'POST'])
 @login_required
+@fresh_login_required
 def account(user_code):
     # Checks if the user is a student and if they are viewing their own account page
     if current_user.auth == 'student':
@@ -536,8 +539,6 @@ def account(user_code):
                 flash('Successfully Updated Password')
             else:
                 flash('Invalid Password')
-        else:
-            print(password_form.confirm_password.errors)
 
         return render_template("account.html", user=user, form=form, passwdform=password_form)
     return render_template("account.html", user=user, form=form, passwdform=None)
@@ -808,6 +809,4 @@ def error500(e):
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-    print(current_user.tags)
-    print([tag.tag_uid for tag in current_user.tags])
     return 'test'

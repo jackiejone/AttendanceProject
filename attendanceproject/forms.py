@@ -1,11 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import (StringField, SelectField, IntegerField, PasswordField,
-                     BooleanField, SubmitField, SelectMultipleField, FieldList,
-                     FormField, RadioField, DateField, HiddenField)
+from wtforms import (StringField, SelectField, PasswordField, BooleanField,
+                     SubmitField, SelectMultipleField, RadioField)
 from wtforms.widgets import CheckboxInput, ListWidget
-from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError, AnyOf, StopValidation
+from wtforms.validators import Length, InputRequired, Email, EqualTo, ValidationError
 from wtforms.fields.html5 import TimeField
-from attendanceproject.models import *
+from attendanceproject.models import SubjectCode, Times
 from flask_login import current_user
 import datetime
 
