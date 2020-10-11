@@ -148,6 +148,8 @@ class ChangePassword(FlaskForm):
                                     render_kw={"placeholder": "Confirm Password"})
     change = SubmitField('Update Password')
     
-
 class DeleteAccount(FlaskForm):
     delete = SubmitField('Delete Account')
+
+class DeleteClass(FlaskForm):
+    delete = SubmitField('Delete Class')

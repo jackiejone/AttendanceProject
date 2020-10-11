@@ -3,7 +3,7 @@ from flask import render_template, request, flash, redirect, url_for, abort
 from attendanceproject import app, db
 from attendanceproject.forms import (RegisterForm, LoginForm, CreateClassForm, JoinClassForm, CodeJoinForm,
                                      AddTimesForm, SetTimesForm, UnsetTimesForm, AddScanner, AddStudentAttndTime,
-                                     SetAuth, ChangePassword, DeleteAccount)
+                                     SetAuth, ChangePassword, DeleteAccount, DeleteClass)
 from attendanceproject.models import TagQueue, User, AttendanceTime, Scanner, UserSubject, SubjectTimes, SubjectCode, Times
 from flask_login import (login_user, login_required,
                          logout_user, current_user,
@@ -301,7 +301,7 @@ def create_class():
     return render_template('create_class.html', form=form)
 
 # Route for viewing all classes/subjects
-@app.route('/classes')
+@app.route('/classes', methods=['GET'])
 @login_required
 def all_classes():
     # Checking if the user is a teacher
@@ -313,7 +313,7 @@ def all_classes():
     return render_template('classes.html', classes=classes)
 
 # Route for viewing a specific subject but not as a particular user
-@app.route('/classes/<subject>')
+@app.route('/classes/<subject>', methods=['GET', 'POST'])
 @login_required
 def view_subject(subject):
     # Checking if the user is a teacher
@@ -322,8 +322,27 @@ def view_subject(subject):
         return redirect(url_for('home'))
     # getting the class/subject from the database
     sub = SubjectCode.query.filter_by(code=subject).first()
+
+    # Checking if the user is an admin
+    if current_user.auth == 'admin':
+        # Creating the delete class form
+        form = DeleteClass()
+        if request.method == 'POST' and form.validate_on_submit():
+            try:
+                for i in Scanner.query.filter_by(subject_id=sub.id).all():
+                    db.session.delete(i)
+                db.session.flush()
+            except:
+                db.session.rollback()
+                flash('Unable to delete subject from scanner')
+            else:
+                db.session.commit()
+            # TODO: Delete rest of data. Use sub.users, sub.times, sub.scanner AND queries
+    else:
+        form = None
+
     if sub:
-        return render_template('class.html', subject=sub, days=CONSTANT_DAYS)
+        return render_template('class.html', subject=sub, days=CONSTANT_DAYS, form=form)
     else:
         flash('Class could not be found')
         return redirect(url_for('all_classes'))
@@ -391,6 +410,7 @@ def class_code(class_code, user_code, day):
         total_days = day_num() - day
         current_date = datetime.date.today() - datetime.timedelta(days=total_days)
         # For this one, show the attendane of each student in the class on a certain day
+
         if (current_user.auth in ['teacher', 'admin'] and class_code in
             [x.subject.code for x in current_user.subjects]) and user == current_user:
 
@@ -470,9 +490,10 @@ def class_code(class_code, user_code, day):
             user_attendance_today = None
             for i in user_attendance_times:
                 if i.time.date() == current_date:
-                    user_attendance_today = i #BROKEN
-            return render_template("teacherstudentclass.html", subject=subject, user=user, days=CONSTANT_DAYS, student_times=user_attendance_times, form=form, class_times=class_times,
-                                   current_date=current_date.strftime('%d/%m/%y'), day=day, today_date=datetime.date.today().strftime('%d/%m/%y'), teacher=current_user, user_attendance_today=user_attendance_today)
+                    user_attendance_today = i #BROKEN TODO: Fix this
+            return render_template("teacherstudentclass.html", subject=subject, user=user, days=CONSTANT_DAYS, student_times=user_attendance_times, form=form,
+                                    class_times=class_times, current_date=current_date.strftime('%d/%m/%y'), day=day, today_date=datetime.date.today().strftime('%d/%m/%y'),
+                                    teacher=current_user, user_attendance_today=user_attendance_today)
         
         # User is a student and they're viewing their class
         elif (current_user.auth == 'student' and class_code in
@@ -489,7 +510,8 @@ def class_code(class_code, user_code, day):
             for time in student_attnd_times:
                 if time.time.date() == (datetime.date(2019, 12, 31) + datetime.timedelta(days=day)):
                     attendance_on_day = time
-            return render_template("studentclass.html", subject=subject, days=CONSTANT_DAYS, attnd_times=student_attnd_times_weeks, attnd_day=attendance_on_day, current_date=current_date)
+            return render_template("studentclass.html", subject=subject, days=CONSTANT_DAYS, attnd_times=student_attnd_times_weeks,
+                                    attnd_day=attendance_on_day, current_date=current_date)
         
         # User is a student but they're not viewing one of their class
         else:

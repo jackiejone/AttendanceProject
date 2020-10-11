@@ -30,4 +30,11 @@
     {% if class_code %}
         <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
     {% endif %}
+
+    {% if form %}
+        <form action='' method='POST'>
+            {{ form.hidden_tag() }}
+            {{ form.delete }}
+        </form>
+    {% endif %}
 {% endblock %}
