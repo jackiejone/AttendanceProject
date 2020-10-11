@@ -40,4 +40,11 @@
     {% else %}
         <p>Not enrolled in any classes</p>
     {% endif %}
+
+    {% if delete_form %}
+        <form action="" method="POST">
+            {{ delete_form.hidden_tag() }}
+            {{ delete_form.delete }}
+        </form>
+    {% endif %}
 {% endblock %}

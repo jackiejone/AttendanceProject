@@ -4,7 +4,7 @@ from attendanceproject import app, db
 from attendanceproject.forms import (RegisterForm, LoginForm, CreateClassForm, JoinClassForm, CodeJoinForm,
                                      AddTimesForm, SetTimesForm, UnsetTimesForm, AddScanner, AddStudentAttndTime,
                                      SetAuth, ChangePassword, DeleteAccount)
-from attendanceproject.models import User, AttendanceTime, Scanner, UserSubject, SubjectTimes, SubjectCode, Times
+from attendanceproject.models import TagQueue, User, AttendanceTime, Scanner, UserSubject, SubjectTimes, SubjectCode, Times
 from flask_login import (login_user, login_required,
                          logout_user, current_user,
                          fresh_login_required)
@@ -517,10 +517,12 @@ def account(user_code):
         flash('User does not exist')
         return redirect(url_for('home'))
 
-    # Form for setting the authentication of a user
+    # Checking if the current user is an admin and the admin is not viewing another admin's page
     if current_user.auth == "admin" and user.auth != "admin":
+        
+        # Form for setting the authentication of a user
         form = SetAuth(user_auth=user.auth)
-        if request.method == 'POST' and form.validate_on_submit():
+        if request.method == 'POST' and form.submit.data and form.validate_on_submit():
             user.auth = form.user_auth.data
             try:
                 db.session.flush()
@@ -529,21 +531,58 @@ def account(user_code):
                 flash("An Error Occurred, failed to change user auth")
             else:
                 db.session.commit()
-                flash("Successfully changed user's auth")
-        if current_user != user:
-            delete_form = DeleteAccount()
-            
-            if request.method == 'POST' and delete_form.validate_on_submit():
-                db.session.delete(user)
+                flash("Successfully changed user's authentication")
+            # TODO: update user_type for user_subject table when updating auth
+        
+        # Form for deleting account
+        delete_form = DeleteAccount()
+        if request.method == 'POST' and delete_form.delete.data and delete_form.validate_on_submit():
+            # Deleting User's Attendance Times
+            for i in user.attnd_times:
                 try:
+                    db.session.delete(i)
                     db.session.flush()
                 except:
-                    flash('Failed to delete user')
+                    db.session.rollback()
                 else:
                     db.session.commit()
-                    # ENDED HERE: NEED TO TEST DELETE FEATURE WITH ASSOCITATIONS AND NEED TO PUT IN HTML AND JINJA
-        else:
-            delete_form = None
+            # Deleting User's Subject Associations / classes they're in
+            for i in user.subjects:
+                try:
+                    db.session.delete(i)
+                    db.session.flush()
+                except:
+                    db.session.rollback()
+                else:
+                    db.session.commit()
+            # Deleting the user's tags
+            for i in user.tags:
+                try:
+                    db.session.delete(i)
+                    db.session.flush()
+                except:
+                    db.session.rollback()
+                else:
+                    db.session.commit()
+            # Deleting the user from tag association queues
+            for i in TagQueue.query.filter_by(user=user.id).all():
+                try:
+                    db.session.delete(i)
+                    db.session.flush()
+                except:
+                    db.session.rollback()
+                else:
+                    db.session.commit()
+            # Deleting the user
+            db.session.delete(user)
+            try:
+                db.session.flush()
+            except:
+                flash('Failed to delete user')
+            else:
+                db.session.commit()
+                flash('User Successfully Deleted')
+                return redirect(url_for('all_users'))
     else:
         form = None
         delete_form = None
@@ -559,8 +598,8 @@ def account(user_code):
             else:
                 flash('Invalid Password')
 
-        return render_template("account.html", user=user, form=form, passwdform=password_form)
-    return render_template("account.html", user=user, form=form, passwdform=None)
+        return render_template("account.html", user=user, form=form, passwdform=password_form, delete_form=delete_form)
+    return render_template("account.html", user=user, form=form, passwdform=None, delete_form=delete_form)
 
 
 # Route for logging attendance using a post reqeust from an external http client
