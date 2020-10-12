@@ -328,6 +328,27 @@ def view_subject(subject):
         # Creating the delete class form
         form = DeleteClass()
         if request.method == 'POST' and form.validate_on_submit():
+            # Deleting all scanners associated to the class/subject
+            try:
+                for i in sub.users:
+                    db.session.delete(i)
+                db.session.flush()
+            except:
+                db.session.rollback()
+                flash('Unable to delete users from subject')
+            else:
+                db.session.commit()
+            # Deleting all times for the class/subject
+            try:
+                for i in sub.times:
+                    db.session.delete(i)
+                db.session.flush()
+            except:
+                db.session.rollback()
+                flash('Unable to delete times from subject')
+            else:
+                db.session.commit()
+            # Deleting all scanners associated with the class/subject
             try:
                 for i in Scanner.query.filter_by(subject_id=sub.id).all():
                     db.session.delete(i)
@@ -337,7 +358,27 @@ def view_subject(subject):
                 flash('Unable to delete subject from scanner')
             else:
                 db.session.commit()
-            # TODO: Delete rest of data. Use sub.users, sub.times, sub.scanner AND queries
+            # Deleting any attendance associated to the class/subject
+            try:
+                for i in AttendanceTime.query.filter_by(subject=sub.id).all():
+                    db.session.delete(i)
+                db.session.flush()
+            except:
+                db.session.rollback()
+                flash('Unable to delete subject from scanner')
+            else:
+                db.session.commit()
+            # Deleting the class/subject
+            try:
+                db.session.delete(sub)
+                db.session.flush()
+            except:
+                db.session.rollback()
+                flash('Unable to delete subject from scanner')
+            else:
+                db.session.commit()
+                flash('Successfully Deleted Class')
+                return redirect(url_for('all_classes'))
     else:
         form = None
 
@@ -889,4 +930,6 @@ def error500(e):
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
+    subject = SubjectCode.query.filter_by(id=1).first()
+    print(subject.scanner)
     return 'test'
