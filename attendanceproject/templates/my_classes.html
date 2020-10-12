@@ -35,22 +35,37 @@
     <!-- Doesn't display the form if the current user is not a teacher, there are no choices left in the form 
          and if the user which is being viewed already has the maxmium amount of possible classes -->
     {% if current_user.auth == 'teacher' and form.classes.choices and user_classes|length < 6 %}
-        <h2>Add user to classes</h2>
-        <!-- Adding A student to multiple classes -->
-        {% if form.errors %}
-            <ul class='errors'>
-                {% for error in form.errors %}
-                    {% for e in form.errors[error] %}
-                    <li>{{ e }}</li>
+        <button onclick="toggleView()">Join Classes</button>
+
+        <div id="JoinClasses" style="display:none;">
+            <h2>Join Classes</h2>
+            <!-- Adding A student to multiple classes -->
+            {% if form.errors %}
+                <ul class='errors'>
+                    {% for error in form.errors %}
+                        {% for e in form.errors[error] %}
+                        <li>{{ e }}</li>
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
-            </ul>
-        {% endif %}
-            <form method='POST' action="">
-                {{ form.hidden_tag() }}
-                {{ form.classes }}
-                {{ form.submit }}
-            </form>
+                </ul>
+            {% endif %}
+                <form method='POST' action="">
+                    {{ form.hidden_tag() }}
+                    {{ form.classes }}
+                    {{ form.submit }}
+                </form>
+        </div>
+
+        <script>
+            function toggleView() {
+            var x = document.getElementById("JoinClasses");
+            if (x.style.display === "none") {
+                x.style.display = "block";
+            } else {
+                x.style.display = "none";
+            }
+            }
+        </script>
         <!-- End of adding a student to multiple classes -->
     {% endif %}
 {% endblock %}
