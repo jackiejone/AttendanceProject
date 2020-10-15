@@ -450,15 +450,16 @@ def class_code(class_code, user_code, day):
     if user:
         total_days = day_num() - day
         current_date = datetime.date.today() - datetime.timedelta(days=total_days)
-        # For this one, show the attendane of each student in the class on a certain day
-
+        
+        # A teacher or admin viewing their own class
         if (current_user.auth in ['teacher', 'admin'] and class_code in
             [x.subject.code for x in current_user.subjects]) and user == current_user:
 
-            # Getting the date of which the user is viewing via the "day" parameter in the link
+            # Checking if the class is on on the particular date
             check = check_class_date(subject_date=current_date, subject=subject)
             student_times = [] # Variable for the times of the students in the class
             students_in_class = 0 # Variable used to check if there are students in the class
+           
             if 'student' in [user.user_type for user in subject.users]:
                 students_in_class = 1
                 # Getting the attendance status of each student in the class for a specific date
@@ -476,8 +477,17 @@ def class_code(class_code, user_code, day):
                         else:
                             student_times.append((user.user, "N/A"))
             if check:
-                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=student_times, time=check, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next, viewing_day=day)
-            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user, days=CONSTANT_DAYS, students_in_class=students_in_class, current_date=current_date.strftime('%d/%m/%y'), student_times=None, week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next, viewing_day=day)
+                return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user,
+                                        days=CONSTANT_DAYS, students_in_class=students_in_class,
+                                        current_date=current_date.strftime('%d/%m/%y'), student_times=student_times,
+                                        time=check, week=current_week(current_date),
+                                        day=CONSTANT_DAYS[current_date.isoweekday()-1], prev_next=prev_next,
+                                        viewing_day=day)
+            return render_template("teacherclass.html", day_num=day_num(), subject=subject, user=current_user,
+                                    days=CONSTANT_DAYS, students_in_class=students_in_class,
+                                    current_date=current_date.strftime('%d/%m/%y'), student_times=None,
+                                    week=current_week(current_date), day=CONSTANT_DAYS[current_date.isoweekday()-1],
+                                    prev_next=prev_next, viewing_day=day)
             
             
         # User is a teacher viewing the class of a student
@@ -560,6 +570,19 @@ def class_code(class_code, user_code, day):
             flash('You do not have access to this page')
             return redirect(url_for('classes', user_code=current_user.user_code))
     return render_template("teacherclass.html", subject=subject)
+
+@app.route('/kick_users/<class_code>', methods=['GET', 'POST'])
+def kick_users(class_code):
+    # TODO: Link this page on the route for viewing own class as a teacher
+    # Checking if there is more than one person in the class
+    """
+    removeUserForm = None
+    if len(subject.users) > 1:
+        # Setting form for removing users from the class and populating the checkbox fields
+        removeUserForm = RemoveUser()
+        removeUserForm.users.choices = [(i.user.id, i.user.fname) for i in subject.users]
+        print([(i.user.id, i.user.fname) for i in subject.users])"""
+    return None
 
 # Account Route
 @app.route('/account/<user_code>', methods=['GET', 'POST'])
