@@ -126,16 +126,19 @@ class AddScanner(FlaskForm):
     subject = SelectField('Subject', coerce=int)
     submit = SubmitField('Submit')
 
+# Form for setting a student's attendance
 class AddStudentAttndTime(FlaskForm):
     day = SelectField("Day", choices=[(x , x) for x in range(1, 32)], coerce=int)
     month = SelectField("Month", choices=[(x, x) for x in range(1, 13)], coerce=int)
     status = SelectField('Attendance Status', choices=[('present', 'Present'), ('late', 'Late'), ('absent', 'Absent')], coerce=str, validators=[InputRequired()])
     submit = SubmitField('Submit')
 
+# Set a user's account authentication
 class SetAuth(FlaskForm):
     user_auth = SelectField("Authentication", choices=[("teacher", "Teacher"), ("student", "Student")])
     submit = SubmitField('Change')
 
+# Form for changing password
 class ChangePassword(FlaskForm):
     oldpasswd = PasswordField('Current Password', validators=[InputRequired(message='Field Required'),
                              Length(min=4)],
@@ -147,9 +150,16 @@ class ChangePassword(FlaskForm):
                                 Length(min=4), EqualTo('newpasswd', message='Passwords Did not match')],
                                     render_kw={"placeholder": "Confirm Password"})
     change = SubmitField('Update Password')
-    
+
+# Form to delete account
 class DeleteAccount(FlaskForm):
     delete = SubmitField('Delete Account')
 
+# Form to delete a class/subject
 class DeleteClass(FlaskForm):
     delete = SubmitField('Delete Class')
+
+# Form for removing students from class
+class RemoveUser(FlaskForm):
+    users = MultiCheckboxField('Users', coerce=int)
+    submit = SubmitField('Join Classes')

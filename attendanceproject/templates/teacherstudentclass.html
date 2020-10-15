@@ -45,8 +45,8 @@
     </form>
 
     <h3>Attendance Toady</h3>
-    {% if user_attendance_toady %}
-        <p>{{ user_attendance_toady.time }} {{ user_attendance_toady.attnd_status }}</p>
+    {% if user_attendance_today %}
+        <p>{{ user_attendance_today.time }} {{ user_attendance_today.attnd_status }}</p>
     {% else %}
         <p>N/A</p>
     {% endif %}

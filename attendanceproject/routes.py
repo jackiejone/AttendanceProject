@@ -3,7 +3,7 @@ from flask import render_template, request, flash, redirect, url_for, abort
 from attendanceproject import app, db
 from attendanceproject.forms import (RegisterForm, LoginForm, CreateClassForm, JoinClassForm, CodeJoinForm,
                                      AddTimesForm, SetTimesForm, UnsetTimesForm, AddScanner, AddStudentAttndTime,
-                                     SetAuth, ChangePassword, DeleteAccount, DeleteClass)
+                                     SetAuth, ChangePassword, DeleteAccount, DeleteClass, RemoveUser)
 from attendanceproject.models import TagQueue, User, AttendanceTime, Scanner, UserSubject, SubjectTimes, SubjectCode, Times
 from flask_login import (login_user, login_required,
                          logout_user, current_user,
@@ -526,12 +526,13 @@ def class_code(class_code, user_code, day):
                             flash('Successfully added new attendance to the database')
                 else:
                     flash('Date was not a valid date for the subject')
-            class_times = get_class_dates(subject) 
+            class_times = get_class_dates(subject)
+            # This checks if the user has an attendance for a particular day
             user_attendance_times = AttendanceTime.query.filter_by(user=user.id, subject=subject.id).all()
             user_attendance_today = None
             for i in user_attendance_times:
                 if i.time.date() == current_date:
-                    user_attendance_today = i #BROKEN TODO: Fix this
+                    user_attendance_today = i
             return render_template("teacherstudentclass.html", subject=subject, user=user, days=CONSTANT_DAYS, student_times=user_attendance_times, form=form,
                                     class_times=class_times, current_date=current_date.strftime('%d/%m/%y'), day=day, today_date=datetime.date.today().strftime('%d/%m/%y'),
                                     teacher=current_user, user_attendance_today=user_attendance_today)
