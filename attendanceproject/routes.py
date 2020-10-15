@@ -587,6 +587,8 @@ def account(user_code):
         form = SetAuth(user_auth=user.auth)
         if request.method == 'POST' and form.submit.data and form.validate_on_submit():
             user.auth = form.user_auth.data
+            for i in user.subjects:
+                i.user_type = form.user_auth.data
             try:
                 db.session.flush()
             except:
@@ -595,7 +597,6 @@ def account(user_code):
             else:
                 db.session.commit()
                 flash("Successfully changed user's authentication")
-            # TODO: update user_type for user_subject table when updating auth
         
         # Form for deleting account
         delete_form = DeleteAccount()
