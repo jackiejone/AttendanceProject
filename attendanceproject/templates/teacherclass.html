@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Viewing <div class='name'>{{ subject.name }}</div> as <div class='name'>{{ user.fname }} {{ user.lname }}</div></h1>
+    <h1>Viewing <div class='name'>{{ subject.name }} | {{ subject.code }}</div> as <div class='name'>{{ user.fname }} {{ user.lname }}</div></h1>
     <a href="{{ prev_next['prev_day'] }}">Prevous Day</a> <a href="{{ prev_next['today'] }}">Today</a> <a href="{{ prev_next['next_day'] }}">Next Day</a>
     <!-- Displaying all the users in the class if the user viewing the class is a teacher -->
     <h2>Times</h2>
@@ -40,5 +40,6 @@
     {% endif %}
 
     </br>
-    <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a>
+    <a href="{{ url_for('settimes', class_code=subject.code) }}">Edit Times</a></br>
+    <a href="{{ url_for('kick_users', class_code=subject.code) }}">Remove Users From Class</a>
 {% endblock %}

@@ -572,17 +572,40 @@ def class_code(class_code, user_code, day):
     return render_template("teacherclass.html", subject=subject)
 
 @app.route('/kick_users/<class_code>', methods=['GET', 'POST'])
+@login_required
 def kick_users(class_code):
+    if current_user.auth not in ['teacher', 'admin']:
+        flash('You do not have access to this page')
+        return redirect(url_for('home'))
     # TODO: Link this page on the route for viewing own class as a teacher
+    # Getting the subject/class from the database
+    subject = SubjectCode.query.filter_by(code=class_code).first()
+    # Checking if the subject/class exists
+    if not subject:
+        flash('Class could not be found')
+        return redirect(url_for('home'))
     # Checking if there is more than one person in the class
-    """
-    removeUserForm = None
     if len(subject.users) > 1:
         # Setting form for removing users from the class and populating the checkbox fields
         removeUserForm = RemoveUser()
-        removeUserForm.users.choices = [(i.user.id, i.user.fname) for i in subject.users]
-        print([(i.user.id, i.user.fname) for i in subject.users])"""
-    return None
+        removeUserForm.users.choices = [(i.user.id, i.user.fname) for i in subject.users if i.user != current_user]
+        if request.method == "POST" and removeUserForm.validate_on_submit():
+            for user_id in removeUserForm.users.data:
+                user = UserSubject.query.filter_by(user_id=user_id).first()
+                try:
+                    db.session.remove(user)
+                    db.session.flush()
+                except:
+                    flash(f'Unable to remove {user.user.fname} {user.user.lname} from class')
+                    db.session.rollback()
+                else:
+                    db.session.commit()
+                    flash('Successfully Removed User/s From Class')
+    else:
+        removeUserForm = None
+
+    return render_template('removeuserclass.html', form=removeUserForm, subject=subject,
+                            user=current_user, day=day_num())
 
 # Account Route
 @app.route('/account/<user_code>', methods=['GET', 'POST'])

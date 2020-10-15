@@ -162,4 +162,4 @@ class DeleteClass(FlaskForm):
 # Form for removing students from class
 class RemoveUser(FlaskForm):
     users = MultiCheckboxField('Users', coerce=int)
-    submit = SubmitField('Join Classes')
+    submit = SubmitField('Remove From Class')

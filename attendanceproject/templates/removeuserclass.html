@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+    <a href="{{url_for('class_code', class_code=subject.code, user_code=user.user_code, day=day)}}"><h1>{{ subject.name }} | {{subject.code}}</h1></a>
+
+    {% if form %}
+        <form action="" method="POST">
+            {{ form.csrf_token }}
+            {% if form.users.errors %}
+                {% for error in form.users.errors %}
+                    <ul>
+                        <li>{{ error }}</li>
+                    </ul>
+                {% endfor %}
+            {% endif %}
+            {{ form.users }}
+            {{ form.submit }}
+        </form>
+    {% else %}
+        <p>No users to remove from class</p>
+    {% endif %}
+{% endblock %}
