@@ -1,7 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1><a href="{{ url_for('class_code', class_code=subject.code, user_code=teacher.user_code, day=day) }}">{{ subject.name }}</a> | {{ user.fname }} {{ user.lname }}</h1>
-
+    <div class='main-header'>
+        <h1>
+            <a href="{{ url_for('class_code', class_code=subject.code, user_code=teacher.user_code, day=day) }}">{{ subject.name }}</a> | {{ user.fname }} {{ user.lname }}
+        </h1>
+    </div>
     <!-- Displaying all the users in the class if the user viewing the class is a teacher -->
     <h2>Times</h2>
     {% if subject.times %}

@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>{{ subject.name }}</h1>
-
+    <div class='main-header'>
+        <h1>{{ subject.name }}</h1>
+    </div>
+    
     <dl>
         <dt>Join Code</dt>
         <dd>{{ subject.join_code }}</dd>

@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div class='scanner'>
+    <div class='main-header'>
         <h1>Scanner</h1>
-        
-
+    </div>
+    <div class='scanner'>
         {% if not form.subject.choices %}
             <p>Please add subjects before adding Scanners</p>
         {% else %}

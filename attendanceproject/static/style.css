@@ -195,12 +195,6 @@ ul {
 
 /* register-login Page End */
 
-
-.name {
-  color: var(--headings);
-  display: inline;
-}
-
 .capatalize {
   text-transform: capitalize;
   display: inline-block;
