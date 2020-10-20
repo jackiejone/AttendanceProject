@@ -2,9 +2,8 @@
 <div id='nav'>
     <ul>
         <div id="nav-left">
-            <li><a href="{{url_for('home')}}">Home</a></li>
             {% if current_user.is_authenticated %}
-                
+                <li><a href="{{url_for('home')}}">Home</a></li>
                 {% if current_user.auth == 'admin' %}
                     <li><a href="{{url_for('all_classes')}}">Classes</a></li>
                     <li><a href="{{url_for('all_users')}}">All Users</a></li> 

@@ -22,6 +22,9 @@ CONSTANT_DAYS = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturd
 @app.route('/', methods=["GET"])
 @app.route('/home', methods=["GET"])
 def home():
+    if current_user.is_anonymous:
+        return redirect(url_for('login'))
+
     user_attendance_today = []
     print(type(user_attendance_today))
     if not current_user.is_anonymous and current_user.auth == 'student': # checks if the user is logged in and is a student
@@ -42,16 +45,15 @@ def home():
                             added = True
                     if not added:
                         user_attendance_today.append((subject.subject.name, 'N/A', subject_time))
+    # checks if the user is a teacher
     elif not current_user.is_anonymous and current_user.auth == 'teacher':
+        # Gets all the classes which is on today for the teacher, to display
         for subject in current_user.subjects:
             for subject_times in subject.subject.times:
-                print(subject_times)
                 if (subject_times.sweek == (ceil((datetime.date.today().timetuple().tm_yday - first_monday())/7))%2
                     and subject_times.sday == datetime.date.today().timetuple().tm_wday):
-                    print('got here')
                     subject_time = subject_times.time.start_time
                     user_attendance_today.append((subject.subject.name, subject_time))
-    print(user_attendance_today)
     return render_template("home.html", user_attendance_today=user_attendance_today, user=current_user)
 
 

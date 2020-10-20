@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Classes for</h1>
-    <h2>{{ user.fname }} {{ user.lname }} {{ user.user_code }}</h2>
+    <div class='main-header'>
+        <h1>{{ user.fname }} {{ user.lname }} | {{ user.user_code }}</h1>
+    </div>
 
     {% if current_user.auth in ['teacher', 'admin'] %}
         <a href="{{ url_for('all_classes') }}">All Classes</a>
