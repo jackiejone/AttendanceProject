@@ -590,20 +590,27 @@ def kick_users(class_code):
         removeUserForm = RemoveUser()
         removeUserForm.users.choices = [(i.user.id, i.user.fname) for i in subject.users if i.user != current_user]
         if request.method == "POST" and removeUserForm.validate_on_submit():
+            print(removeUserForm.users.data)
+            success = False
             for user_id in removeUserForm.users.data:
-                user = UserSubject.query.filter_by(user_id=user_id).first()
+                print(user_id)
+                user = UserSubject.query.filter_by(user_id=user_id, subject_id=subject.id).first()
                 try:
-                    db.session.remove(user)
+                    db.session.delete(user)
                     db.session.flush()
                 except:
                     flash(f'Unable to remove {user.user.fname} {user.user.lname} from class')
                     db.session.rollback()
                 else:
                     db.session.commit()
-                    flash('Successfully Removed User/s From Class')
+                    success = True
+            if success:
+                flash('Successfully Removed User/s From Class')
+            return redirect(url_for('kick_users', class_code=subject.code))
+                    
     else:
         removeUserForm = None
-
+    subject = SubjectCode.query.filter_by(code=class_code).first()
     return render_template('removeuserclass.html', form=removeUserForm, subject=subject,
                             user=current_user, day=day_num())
 
