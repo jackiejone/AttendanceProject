@@ -215,8 +215,13 @@ ul {
 /* End of Account Authentication Form */
 
 /* List of added times */
-#times-list form{
+#times-list form {
   display: inline-block;
+}
+
+#times-list li {
+  margin-top: 10px;
+  font-size: 1.2rem;
 }
 /* endof List of added times */
 
@@ -226,13 +231,14 @@ ul {
 }
 
 .main-lists li {
-  
-  width: 50%;
+  background-color: rgb(240, 240, 240);
   font-size: 1.2rem;
   margin-top: 10px;
-  padding: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
 }
 
 .main-lists li:hover {
-  background-color: rgb(240, 240, 240);
+  background-color: var(--main);
 }
