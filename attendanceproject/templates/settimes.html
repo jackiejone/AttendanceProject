@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
 
-    <!-- TODO: CSS FOR THIS PAGE -->
-    <h1>Set Times</h1>
-    
+    <div class='main-header'>
+        <h1>Set Times</h1>
+    </div>
+
     {% macro render_time_field(field) %}
         <div id='time_field'>
                 {% if field.errors %}

@@ -1,13 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class='main-header'>
-        <h1>All Classes</h1>
+        <h1>Classes</h1>
     </div>
     {% if classes %}
-        <ul>
-            {% for class in classes %}
-                <a href="{{ url_for('view_subject', subject=class.code) }}"><li>{{ class.name }}</li></a>
-            {% endfor %}
-        </ul>
+        <div class='main-lists'>
+            <ul>
+                {% for class in classes %}
+                    <a href="{{ url_for('view_subject', subject=class.code) }}"><li>{{ class.name }}</li></a>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
 {% endblock %}

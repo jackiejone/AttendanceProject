@@ -1,18 +1,21 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class='main-header'>
-        <h1>{{ user.fname }} {{ user.lname }} | {{ user.user_code }}</h1>
+        <h1>Classes for {{ user.fname }} {{ user.lname }} | {{ user.user_code }}</h1>
     </div>
 
     {% if current_user.auth in ['teacher', 'admin'] %}
         <a href="{{ url_for('all_classes') }}">All Classes</a>
     {% endif %}
 
-    <h2>My Classes</h2>
     {% if user_classes %}
-        {% for class in user_classes %}
-            <a href="{{ url_for('class_code', class_code=class.code, user_code=user.user_code, day=day_num) }}"><p>{{ class.name }}</p></a>
-        {% endfor %}
+        <div class='main-lists'>
+            <ul>
+                {% for class in user_classes %}
+                    <a href="{{ url_for('class_code', class_code=class.code, user_code=user.user_code, day=day_num) }}"><li>{{ class.name }}</li></a>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
 
     {% if user.auth == 'student' %}

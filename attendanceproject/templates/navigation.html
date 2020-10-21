@@ -3,13 +3,13 @@
     <ul>
         <div id="nav-left">
             {% if current_user.is_authenticated %}
-                <li><a href="{{url_for('home')}}">Home</a></li>
                 {% if current_user.auth == 'admin' %}
                     <li><a href="{{url_for('all_classes')}}">Classes</a></li>
                     <li><a href="{{url_for('all_users')}}">All Users</a></li> 
                     <li><a href="{{url_for('create_class')}}">New Class</a></li>
                 {% endif %}
                 {% if current_user.auth in ['teacher', 'student'] %}
+                    <li><a href="{{url_for('home')}}">Home</a></li>
                     <li><a href="{{url_for('classes', user_code=current_user.user_code)}}">Classes</a></li>
                 {% endif %}
                 {% if current_user.auth == 'teacher' %}

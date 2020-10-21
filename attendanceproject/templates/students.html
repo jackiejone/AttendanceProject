@@ -4,11 +4,13 @@
         <h1>My Students</h1>
     </div>
     {% if my_students %}
-        <ul>
-            {% for student in my_students %}
-                <a href="{{ url_for('classes', user_code=student.user_code) }}"><li>{{ student.fname}} {{ student.lname }}</li></a>
-            {% endfor %}
-        </ul>
+        <div class='main-lists'>
+            <ul>
+                {% for student in my_students %}
+                    <a href="{{ url_for('classes', user_code=student.user_code) }}"><li>{{ student.fname}} {{ student.lname }}</li></a>
+                {% endfor %}
+            </ul>
+        </div>
     {% else %}
         <p>You have no students</p>
     {% endif %}
@@ -17,11 +19,13 @@
         <h1>All Students</h1>
     </div>
     {% if students %}
-        <ul>
-            {% for student in students %}
-            <a href="{{ url_for('classes', user_code=student.user_code) }}"><li>{{ student.fname }} {{ student.lname }}</li></a>
-            {% endfor %}
-        </ul>
+        <div class='main-lists'>
+            <ul>
+                {% for student in students %}
+                <a href="{{ url_for('classes', user_code=student.user_code) }}"><li>{{ student.fname }} {{ student.lname }}</li></a>
+                {% endfor %}
+            </ul>
+        </div>
     {% else %}
         <p>There are no students</p>
     {% endif %}

@@ -16,30 +16,31 @@
     {% endif %}
 
     {% if form %}
-        <h3>Change user's Authentication</h3>
-        <form action="" method="POST">
-            {{ form.hidden_tag() }}
-            {% if form.user_auth.errors %}
-                <ul>
-                    {% for error in form.user_auth.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            {{ form.user_auth }}
-            {{ form.submit }}
-        </form>
+        <div class="auth">
+            <h3>Authentication</h3>
+            <form action="" method="POST">
+                {{ form.hidden_tag() }}
+                {% if form.user_auth.errors %}
+                    <ul>
+                        {% for error in form.user_auth.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {{ form.user_auth }}
+                {{ form.submit }}
+            </form>
+        </div>
     {% endif %}
 
-    <h3>Classes</h3>
+    
     {% if user.subjects %}
+    <h3>Classes</h3>
         <ul>
             {% for subject in user.subjects %}
                 <li>{{ subject.subject.name }}</li>
             {% endfor %}
         </ul>
-    {% else %}
-        <p>Not enrolled in any classes</p>
     {% endif %}
 
     {% if delete_form %}

@@ -13,6 +13,7 @@ body {
     margin: 0;
     margin-left: auto;
     margin-right: auto;
+    min-width: 800px;
 }
 
 ul {
@@ -29,7 +30,7 @@ ul {
     margin: 0;
     padding: 0;
     background-color: var(--main);
-    min-width: 555px;
+    min-width: 800px;
 }
 
 #nav-left li {
@@ -199,4 +200,39 @@ ul {
   text-transform: capitalize;
   display: inline-block;
   color: var(--headings);
+}
+
+/* Account Authentication Form */
+.auth form {
+  display: inline-block;
+}
+
+.auth h3 {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+/* End of Account Authentication Form */
+
+/* List of added times */
+#times-list form{
+  display: inline-block;
+}
+/* endof List of added times */
+
+.main-lists a {
+  text-decoration: none;
+  color: black;
+}
+
+.main-lists li {
+  
+  width: 50%;
+  font-size: 1.2rem;
+  margin-top: 10px;
+  padding: 5px;
+}
+
+.main-lists li:hover {
+  background-color: rgb(240, 240, 240);
 }

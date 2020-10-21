@@ -24,6 +24,8 @@ CONSTANT_DAYS = ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturd
 def home():
     if current_user.is_anonymous:
         return redirect(url_for('login'))
+    if current_user.auth == 'admin':
+        return redirect(url_for('account', user_code=current_user.user_code))
 
     user_attendance_today = []
     print(type(user_attendance_today))
@@ -65,10 +67,10 @@ def register():
     # Checking for POST request and form validation
     if request.method == "POST" and form.validate_on_submit():
         # Formatting first name, last name, email, and student number to prevent errors
-        fname = form.fname.data.capitalize().strip().lower()
-        lname = form.lname.data.capitalize().strip().lower()
+        fname = form.fname.data.capitalize().strip().lower().capitalize()
+        lname = form.lname.data.capitalize().strip().lower().capitalize()
         email = form.email.data.strip().lower()
-        user_code = form.std_code.data.strip().lower()
+        user_code = form.std_code.data.strip().lower().upper()
         # Generates hashed password using SHA256 encryption method
         hashed_password = generate_password_hash(form.password.data, method='sha256', salt_length=10)
         # Defines new user object to add to database
@@ -280,8 +282,8 @@ def create_class():
     # Checks for POST request and valid form
     if request.method == 'POST' and form.validate_on_submit():
         # Prepares form data For insertion into database
-        class_name = form.cname.data.capitalize().strip().lower()
-        class_code = form.ccode.data.strip().upper()
+        class_name = form.cname.data.capitalize().strip().lower().capitalize()
+        class_code = form.ccode.data.strip().upper().upper()
         join_code = generate_code()
         # Creates new class object with data from the form
         new_class = SubjectCode(name=class_name, code=class_code,
