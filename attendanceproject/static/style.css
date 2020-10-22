@@ -242,3 +242,35 @@ ul {
 .main-lists li:hover {
   background-color: var(--main);
 }
+
+#update-password {
+  width: 600px;
+}
+
+#scanner-form {
+  width: 50%;
+}
+
+.all-classes-button {
+  color: black;
+  background-color: var(--headings);
+  border: 0;
+  font-size: 1rem;
+  border-radius: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 0;
+  padding-right: 0;
+  cursor: pointer;
+  margin-top: 5px;
+  width: 10%;
+  height: 2rem;
+  text-align: center;
+  min-width: 120px;
+}
+
+.all-classes-button a {
+  color: black;
+  text-decoration: none;
+  vertical-align: middle;
+}

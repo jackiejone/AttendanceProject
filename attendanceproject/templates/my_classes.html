@@ -5,7 +5,9 @@
     </div>
 
     {% if current_user.auth in ['teacher', 'admin'] %}
-        <a href="{{ url_for('all_classes') }}">All Classes</a>
+        <div class='all-classes-button'>
+            <a href="{{ url_for('all_classes') }}">All Classes</a>
+        </div>
     {% endif %}
 
     {% if user_classes %}

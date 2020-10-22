@@ -8,12 +8,14 @@
             <p>Please add subjects before adding Scanners</p>
         {% else %}
             <!-- Form for adding a class to a scanner -->
-            <form action='' method='POST'>
-                    {{ form.csrf_token }}
-                    {{ render_field(form.scanner) }}
-                    {{ render_field(form.subject) }}
-                    <div class='submit'>{{ form.submit }}</div>
-            </form>
+            <div id='scanner-form'>
+                <form action='' method='POST'>
+                        {{ form.csrf_token }}
+                        {{ render_field(form.scanner) }}
+                        {{ render_field(form.subject) }}
+                        <div class='submit'>{{ form.submit }}</div>
+                </form>
+            </div>
         {% endif %}
     </div>
 {% endblock %}
